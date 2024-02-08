@@ -18,9 +18,9 @@ unsafe impl Sync for InferRequest {}
 
 impl InferRequest {
     /// Set the batch size of the inference requests.
-    pub fn set_batch_size(&mut self, size: usize) -> Result<()> {
-        try_unsafe!(ie_infer_request_set_batch(self.instance, size))
-    }
+    // pub fn set_batch_size(&mut self, size: usize) -> Result<()> {
+    //     try_unsafe!(ie_infer_request_set_batch(self.instance, size))
+    // }
 
     /// Assign a [Blob] to the input (i.e. `name`) on the network.
     pub fn set_blob(&mut self, name: &str, blob: &Blob) -> Result<()> {
