@@ -2,9 +2,8 @@
 //!  - [`CNNNetwork`] is the OpenVINO representation of a neural network
 //!  - [`ExecutableNetwork`] is the compiled representation of a [`CNNNetwork`] for a device.
 
-use crate::port::Port;
 use crate::request::InferRequest;
-use crate::{drop_using_function, try_unsafe, util::Result};
+use crate::{cstr, drop_using_function, try_unsafe, util::Result};
 //use crate::{Layout, Precision, ResizeAlgorithm};
 // use openvino_sys::{
 //     ie_exec_network_create_infer_request, ie_exec_network_free, ie_executable_network_t,
@@ -15,94 +14,76 @@ use crate::{drop_using_function, try_unsafe, util::Result};
 // };
 
 use openvino_sys::{
-    ov_compiled_model_create_infer_request, ov_compiled_model_free,
-    ov_compiled_model_input_by_name, ov_compiled_model_t, ov_model_const_input_by_index,
-    ov_model_const_output_by_index, ov_model_const_output_by_name, ov_model_free,
-    ov_model_inputs_size, ov_model_outputs_size, ov_model_t,
+    ov_compiled_model_create_infer_request, ov_compiled_model_free, ov_compiled_model_t,
+    ov_model_free, ov_compiled_model_input_by_name, ov_model_inputs_size,
+    ov_model_const_output_by_name, ov_model_outputs_size, ov_compiled_model_inputs_size, ov_compiled_model_outputs_size, 
+    
+    /*ie_network_name_free,
+    ie_network_set_input_layout, ie_network_set_input_precision,
+    ie_network_set_input_resize_algorithm, ie_network_set_output_precision,*/ ov_model_t,
 };
+
+use std::ffi::CStr;
 
 /// See
 /// [`CNNNetwork`](https://docs.openvinotoolkit.org/latest/classInferenceEngine_1_1CNNNetwork.html).
-
-pub struct Model {
-    pub(crate) instance: *mut ov_model_t,
+pub struct CompiledModel {
+    pub(crate) instance: *mut ov_compiled_model_t,
 }
-drop_using_function!(Model, ov_model_free);
+drop_using_function!(CompiledModel, ov_model_free);
 
-unsafe impl Send for Model {}
-unsafe impl Sync for Model {}
+unsafe impl Send for CompiledModel {}
+unsafe impl Sync for CompiledModel {}
 
-impl Model {
+impl CompiledModel {
     /// Retrieve the number of network inputs.
     pub fn get_inputs_len(&self) -> Result<usize> {
         let mut num: usize = 0;
-        try_unsafe!(ov_model_inputs_size(self.instance, &mut num))?;
+        try_unsafe!(ov_compiled_model_inputs_size(self.instance, &mut num))?;
         Ok(num)
     }
 
     /// Retrieve the number of network outputs.
     pub fn get_outputs_len(&self) -> Result<usize> {
         let mut num: usize = 0;
-        try_unsafe!(ov_model_outputs_size(self.instance, &mut num))?;
+        try_unsafe!(ov_compiled_model_outputs_size(self.instance, &mut num))?;
         Ok(num)
     }
+/*
+    /// Retrieve the name identifying the input tensor at `index`.
+    pub fn get_input_name(&self, index: usize) -> Result<String> {
+        let mut c_name = std::ptr::null_mut();
 
-    pub fn get_input_by_index(&self, index: usize) -> Result<Port> {
-        //let mut num: usize = 0;
-        let mut port = std::ptr::null_mut();
-        try_unsafe!(ov_model_const_input_by_index(
+        try_unsafe!(ov_compiled_model_input_by_name(
             self.instance,
             index,
-            std::ptr::addr_of_mut!(port)
+            std::ptr::addr_of_mut!(c_name)
         ))?;
-        Ok(Port { instance: port })
+        let rust_name = unsafe { CStr::from_ptr(c_name) }
+            .to_string_lossy()
+            .into_owned();
+        unsafe { ov_model_free(std::ptr::addr_of_mut!(c_name)) };
+        debug_assert!(c_name.is_null());
+        Ok(rust_name)
     }
-
-    pub fn get_output_by_index(&self, index: usize) -> Result<Port> {
-        let mut port = std::ptr::null_mut();
-        try_unsafe!(ov_model_const_output_by_index(
+*/
+/*
+    /// Retrieve the name identifying the output tensor at `index`.
+    pub fn get_output_name(&self, index: usize) -> Result<String> {
+        let mut c_name = std::ptr::null_mut();
+        try_unsafe!(ov_model_const_output_by_name(
             self.instance,
             index,
-            std::ptr::addr_of_mut!(port)
+            std::ptr::addr_of_mut!(c_name)
         ))?;
-        Ok(Port { instance: port })
+        let rust_name = unsafe { CStr::from_ptr(c_name) }
+            .to_string_lossy()
+            .into_owned();
+        unsafe { ov_model_free(std::ptr::addr_of_mut!(c_name)) };
+        debug_assert!(c_name.is_null());
+        Ok(rust_name)
     }
-
-    /*
-        /// Retrieve the name identifying the input tensor at `index`.
-        pub fn get_input_name(&self, index: usize) -> Result<String> {
-            let mut c_name = std::ptr::null_mut();
-
-            try_unsafe!(ov_compiled_model_input_by_name(
-                self.instance,
-                index,
-                std::ptr::addr_of_mut!(c_name)
-            ))?;
-            let rust_name = unsafe { CStr::from_ptr(c_name) }
-                .to_string_lossy()
-                .into_owned();
-            unsafe { ov_model_free(std::ptr::addr_of_mut!(c_name)) };
-            debug_assert!(c_name.is_null());
-            Ok(rust_name)
-        }
-    */
-    /*
-        /// Retrieve the name identifying the output tensor at `index`.
-        pub fn get_output_name(&self, index: usize) -> Result<String> {
-            let mut c_name = std::ptr::null_mut();
-            try_unsafe!(ov_model_const_output_by_name(
-                self.instance,
-                index,
-                std::ptr::addr_of_mut!(c_name)
-            ))?;
-            let rust_name = unsafe { CStr::from_ptr(c_name) }
-                .to_string_lossy()
-                .into_owned();
-            unsafe { ov_model_free(std::ptr::addr_of_mut!(c_name)) };
-            debug_assert!(c_name.is_null());
-            Ok(rust_name)
-        }
-    */
+*/
     // /// Configure a resize algorithm for the input tensor at `input_name`.
     // pub fn set_input_resize_algorithm(
     //     &mut self,
@@ -146,14 +127,14 @@ impl Model {
 
 /// See
 /// [`ExecutableNetwork`](https://docs.openvinotoolkit.org/latest/classInferenceEngine_1_1ExecutableNetwork.html).
-pub struct CompiledModel {
+pub struct ExecutableNetwork {
     pub(crate) instance: *mut ov_compiled_model_t,
 }
-drop_using_function!(CompiledModel, ov_compiled_model_free);
+drop_using_function!(ExecutableNetwork, ov_compiled_model_free);
 
-unsafe impl Send for CompiledModel {}
+unsafe impl Send for ExecutableNetwork {}
 
-impl CompiledModel {
+impl ExecutableNetwork {
     /// Create an [`InferRequest`].
     pub fn create_infer_request(&mut self) -> Result<InferRequest> {
         let mut instance = std::ptr::null_mut();

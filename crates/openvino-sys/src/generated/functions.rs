@@ -515,7 +515,7 @@ extern "C" {
         shape: ov_shape_t,
         object_args_size: usize,
         remote_tensor: *mut *mut ov_tensor_t,
-        /*...*/
+        ...
     ) -> ov_status_e;
 }
 extern "C" {
@@ -639,7 +639,7 @@ extern "C" {
     #[doc = " @brief Sets properties for a device, acceptable keys can be found in ov_property_key_xxx.\n @ingroup ov_compiled_model_c_api\n @param compiled_model A pointer to the ov_compiled_model_t.\n @param ... variadic paramaters The format is <char *property_key, char* property_value>.\n Supported property key please see ov_property.h.\n @return Status code of the operation: OK(0) for success."]
     pub fn ov_compiled_model_set_property(
         compiled_model: *const ov_compiled_model_t,
-        /*...*/
+        ...
     ) -> ov_status_e;
 }
 extern "C" {
@@ -746,7 +746,7 @@ extern "C" {
         device_name: *const ::std::os::raw::c_char,
         property_args_size: usize,
         compiled_model: *mut *mut ov_compiled_model_t,
-        /*...*/
+        ...
     ) -> ov_status_e;
 }
 extern "C" {
@@ -757,7 +757,7 @@ extern "C" {
         device_name: *const ::std::os::raw::c_char,
         property_args_size: usize,
         compiled_model: *mut *mut ov_compiled_model_t,
-        //...
+        ...
     ) -> ov_status_e;
 }
 extern "C" {
@@ -769,7 +769,7 @@ extern "C" {
         device_name: *const ::std::os::raw::c_char,
         property_args_size: usize,
         compiled_model: *mut *mut ov_compiled_model_t,
-        //...
+        ...
     ) -> ov_status_e;
 }
 extern "C" {
@@ -777,7 +777,7 @@ extern "C" {
     pub fn ov_core_set_property(
         core: *const ov_core_t,
         device_name: *const ::std::os::raw::c_char,
-        //...
+        ...
     ) -> ov_status_e;
 }
 extern "C" {
@@ -829,7 +829,7 @@ extern "C" {
         device_name: *const ::std::os::raw::c_char,
         context_args_size: usize,
         context: *mut *mut ov_remote_context_t,
-        //...
+        ...
     ) -> ov_status_e;
 }
 extern "C" {
@@ -840,7 +840,7 @@ extern "C" {
         context: *const ov_remote_context_t,
         property_args_size: usize,
         compiled_model: *mut *mut ov_compiled_model_t,
-        //...
+        ...
     ) -> ov_status_e;
 }
 extern "C" {
@@ -983,7 +983,7 @@ extern "C" {
         preprocess_input_tensor_info: *mut ov_preprocess_input_tensor_info_t,
         colorFormat: ov_color_format_e,
         sub_names_size: usize,
-        //...
+        ...
     ) -> ov_status_e;
 }
 extern "C" {

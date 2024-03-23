@@ -34,7 +34,7 @@ fn detect_inception() {
         .unwrap();
 
     // Load the network.
-    let mut executable_network = core.load_network(&network, "CPU").unwrap();
+    let mut executable_network = core.compile_model(&network, "CPU").unwrap();
     let mut infer_request = executable_network.create_infer_request().unwrap();
 
     // Read the image.
@@ -43,7 +43,7 @@ fn detect_inception() {
     let blob = Blob::new(&tensor_desc, &tensor_data).unwrap();
 
     // Execute inference.
-    infer_request.set_blob(input_name, &blob).unwrap();
+    infer_request.set_tensor(input_name, &blob).unwrap();
     infer_request.infer().unwrap();
     let mut results = infer_request.get_blob(output_name).unwrap();
     let buffer = unsafe { results.buffer_mut_as_type::<f32>().unwrap().to_vec() };
