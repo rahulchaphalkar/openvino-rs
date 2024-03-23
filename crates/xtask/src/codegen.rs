@@ -161,4 +161,5 @@ const TYPES_FILE: &str = "types.rs";
 const FUNCTIONS_FILE: &str = "functions.rs";
 const DEFAULT_OUTPUT_DIRECTORY: &str = "openvino-sys/src/generated";
 //const DEFAULT_HEADER_FILE: &str = "openvino-sys/upstream/src/bindings/c/include/c_api/ie_c_api.h";
-const DEFAULT_HEADER_FILE: &str = "openvino-sys/upstream/src/bindings/c/include/openvino/c/openvino.h";
+const DEFAULT_HEADER_FILE: &str =
+    "openvino-sys/upstream/src/bindings/c/include/openvino/c/openvino.h";
