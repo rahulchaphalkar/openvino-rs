@@ -13,7 +13,7 @@ pub enum ElementType {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use openvino_sys::*;
+    use openvino_sys::ov_element_type_e_UNDEFINED;
 
     #[test]
     fn check_discriminant_values() {

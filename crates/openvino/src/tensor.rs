@@ -116,6 +116,11 @@ impl Tensor {
         Ok(slice)
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+}
 /*
 #[cfg(test)]
 mod tests {
