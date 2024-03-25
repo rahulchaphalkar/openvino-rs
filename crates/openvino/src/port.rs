@@ -1,5 +1,4 @@
 use std::ffi::CStr;
-
 use crate::{try_unsafe, util::Result};
 use openvino_sys::{ov_output_const_port_t, ov_port_get_any_name};
 
@@ -20,8 +19,3 @@ impl Port {
         Ok(rust_name)
     }
 }
-
-// ov_port_get_any_name(
-//     const ov_output_const_port_t \* port,
-//     char \*\* tensor_name
-//     );

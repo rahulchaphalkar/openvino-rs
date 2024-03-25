@@ -1,7 +1,5 @@
 use std::ffi::CString;
-
 use openvino_sys::{ov_layout_create, ov_layout_free, ov_layout_t};
-
 use crate::{drop_using_function, try_unsafe};
 
 pub struct Layout {
@@ -14,7 +12,6 @@ impl Layout {
         let mut layout = std::ptr::null_mut();
         let c_layout_desc = CString::new(layout_desc).unwrap();
         let code = try_unsafe!(ov_layout_create(
-            //layout_desc.as_ptr() as *const i8,
             c_layout_desc.as_ptr(),
             std::ptr::addr_of_mut!(layout)
         ));
