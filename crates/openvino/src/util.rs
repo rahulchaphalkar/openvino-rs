@@ -29,10 +29,7 @@ macro_rules! drop_using_function {
     ($ty: ty, $free_fn: expr) => {
         impl Drop for $ty {
             fn drop(&mut self) {
-                //unsafe { $free_fn(&mut self.instance as *mut *mut _) }
                 unsafe { $free_fn(self.instance as *mut _) }
-                println!("Called free function for {}", stringify!($ty));
-                //debug_assert!(self.instance.is_null())
             }
         }
     };

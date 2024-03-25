@@ -10,13 +10,6 @@ pub enum ElementType {
     F64 = 6,
 }
 
-// impl ElementType {
-//     pub fn new(element_type:ElementType)->Self {
-//         element_type
-//     }
-
-// }
-
 #[cfg(test)]
 mod tests {
     use super::*;

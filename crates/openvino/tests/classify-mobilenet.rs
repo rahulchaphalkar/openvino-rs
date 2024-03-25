@@ -68,8 +68,6 @@ fn classify_mobilenet() {
     let mut executable_network = core.compile_model(network, "CPU").unwrap();
     let mut infer_request = executable_network.create_infer_request().unwrap();
 
-    // Read the image.
-
     // Execute inference.
     infer_request.set_tensor("input", &tensor); /*.unwrap();*/
     infer_request.infer().unwrap();

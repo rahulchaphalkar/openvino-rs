@@ -1,22 +1,14 @@
 //! Define the core interface between Rust and OpenVINO's C
 //! [API](https://docs.openvinotoolkit.org/latest/ie_c_api/modules.html).
 
-use crate::blob::Tensor;
-//use crate::tensor_desc::TensorDesc;
 use crate::{cstr, drop_using_function, try_unsafe, util::Result};
 use crate::{
     error::{LoadingError, SetupError},
     network::{CompiledModel, Model},
 };
-//use crate::{Layout, Precision};
-// use openvino_sys::{
-//     self, ie_config_t, ie_core_create, ie_core_free, ie_core_load_network, ie_core_read_network,
-//     ie_core_read_network_from_memory, ie_core_t,
-// };
 
 use openvino_sys::{
-    self, ov_core_compile_model, /*ie_config_t,*/ ov_core_create, ov_core_free,
-    /*ie_core_load_network,*/ ov_core_read_model, ov_core_read_model_from_memory, ov_core_t,
+    self, ov_core_compile_model, ov_core_create, ov_core_free, ov_core_read_model, ov_core_t,
 };
 
 /// See [Core](https://docs.openvinotoolkit.org/latest/classInferenceEngine_1_1Core.html).
@@ -46,7 +38,6 @@ impl Core {
         };
 
         let mut instance = std::ptr::null_mut();
-        //try_unsafe!(ov_core_create(file, std::ptr::addr_of_mut!(instance)))?;
         try_unsafe!(ov_core_create(std::ptr::addr_of_mut!(instance)))?;
         Ok(Core { instance })
     }
@@ -68,62 +59,19 @@ impl Core {
         Ok(Model { instance })
     }
 
-    // /// Read a [`CNNNetwork`] from a pair of byte slices: `model_content` contains the XML data
-    // /// describing the OpenVINO network IR and `weights_content` contains the binary weights.
-    // pub fn read_network_from_buffer(
-    //     &mut self,
-    //     model_content: &[u8],
-    //     weights_content: &[u8],
-    // ) -> Result<CNNNetwork> {
-    //     let mut instance = std::ptr::null_mut();
-    //     let weights_desc = TensorDesc::new(Layout::ANY, &[weights_content.len()], Precision::U8);
-    //     let weights_blob = Blob::new(&weights_desc, weights_content)?;
-    //     try_unsafe!(ov_core_read_model_from_memory(
-    //         self.instance,
-    //         model_content.as_ptr().cast::<u8>(),
-    //         model_content.len(),
-    //         weights_blob.instance,
-    //         std::ptr::addr_of_mut!(instance)
-    //     ))?;
-    //     Ok(CNNNetwork { instance })
-    // }
-
-    // /// Instantiate a [`CNNNetwork`] as an [`ExecutableNetwork`] on the specified `device`.
+    /// Instantiate a [`CNNNetwork`] as an [`ExecutableNetwork`] on the specified `device`.
     pub fn compile_model(&mut self, network: Model, device: &str) -> Result<CompiledModel> {
-        //let mut instance = std::ptr::null_mut();
         let mut compiled_model = CompiledModel {
             instance: std::ptr::null_mut(),
         };
-        // Because `ie_core_load_network` does not allow a null pointer for the configuration, we
-        // construct an empty configuration struct to pass. At some point, it could be good to allow
-        // users to pass a map to this function that gets converted to an `ie_config_t` (TODO).
-        // let empty_config = ie_config_t {
-        //     name: std::ptr::null(),
-        //     value: std::ptr::null(),
-        //     next: std::ptr::null_mut(),
-        // };
-        // let empty_config = ie_config_t {
-        //     name: std::ptr::null(),
-        //     value: std::ptr::null(),
-        //     next: std::ptr::null_mut(),
-        // };
         let num_property_args = 0;
-        // try_unsafe!(ie_core_load_network(
-        //     self.instance,
-        //     network.instance,
-        //     cstr!(device),
-        //     std::ptr::addr_of!(empty_config),
-        //     std::ptr::addr_of_mut!(instance)
-        // ))?;
         try_unsafe!(ov_core_compile_model(
             self.instance,
             network.instance,
             cstr!(device),
-            //std::ptr::addr_of!(empty_config),
             num_property_args,
             std::ptr::addr_of_mut!(compiled_model.instance)
         ))?;
-        //Ok(CompiledModel { instance })
         Ok(compiled_model)
     }
 }
