@@ -1,6 +1,6 @@
-//! Contains the network representations in OpenVINO:
-//!  - [`CNNNetwork`] is the OpenVINO representation of a neural network
-//!  - [`ExecutableNetwork`] is the compiled representation of a [`CNNNetwork`] for a device.
+//! Contains the model representations in OpenVINO:
+//!  - [`CNNmodel`] is the OpenVINO representation of a neural model
+//!  - [`Executablemodel`] is the compiled representation of a [`CNNmodel`] for a device.
 
 use crate::port::Port;
 use crate::request::InferRequest;
@@ -14,7 +14,7 @@ use openvino_sys::{
 };
 
 /// See
-/// [`CNNNetwork`](https://docs.openvinotoolkit.org/latest/classInferenceEngine_1_1CNNNetwork.html).
+/// [`CNNmodel`](https://docs.openvinotoolkit.org/latest/classInferenceEngine_1_1CNNmodel.html).
 
 pub struct Model {
     pub(crate) instance: *mut ov_model_t,
@@ -25,14 +25,14 @@ unsafe impl Send for Model {}
 unsafe impl Sync for Model {}
 
 impl Model {
-    /// Retrieve the number of network inputs.
+    /// Retrieve the number of model inputs.
     pub fn get_inputs_len(&self) -> Result<usize> {
         let mut num: usize = 0;
         try_unsafe!(ov_model_inputs_size(self.instance, &mut num))?;
         Ok(num)
     }
 
-    /// Retrieve the number of network outputs.
+    /// Retrieve the number of model outputs.
     pub fn get_outputs_len(&self) -> Result<usize> {
         let mut num: usize = 0;
         try_unsafe!(ov_model_outputs_size(self.instance, &mut num))?;
@@ -61,7 +61,7 @@ impl Model {
 }
 
 /// See
-/// [`ExecutableNetwork`](https://docs.openvinotoolkit.org/latest/classInferenceEngine_1_1ExecutableNetwork.html).
+/// [`Executablemodel`](https://docs.openvinotoolkit.org/latest/classInferenceEngine_1_1Executablemodel.html).
 pub struct CompiledModel {
     pub(crate) instance: *mut ov_compiled_model_t,
 }

@@ -6,8 +6,7 @@ mod util;
 
 use fixtures::mobilenet::Fixture;
 use openvino::{
-    Core, ElementType, Layout, PrePostprocess, PreprocessInputTensorInfo, PreprocessSteps,
-    Shape, Tensor,
+    Core, ElementType, Layout, PrePostprocess, Shape, Tensor,
 };
 use std::fs;
 use util::{Prediction, Predictions};
@@ -15,11 +14,11 @@ use util::{Prediction, Predictions};
 #[test]
 fn classify_mobilenet() {
     //initialize openvino runtime core
-    let mut core = Core::new(None).unwrap();
+    let mut core = Core::new().unwrap();
 
     //Read the model
-    let mut network = core
-        .read_network_from_file(
+    let mut model = core
+        .read_model_from_file(
             &Fixture::graph().to_string_lossy(),
             &Fixture::weights().to_string_lossy(),
         )
@@ -31,42 +30,43 @@ fn classify_mobilenet() {
     let element_type = ElementType::F32;
     let tensor = Tensor::new_from_host_ptr(element_type, input_shape, &data).unwrap();
 
-    let pre_post_process = PrePostprocess::new(&network);
+    let pre_post_process = PrePostprocess::new(&model);
     let input_info = pre_post_process.get_input_info_by_name("input");
-    let input_tensor_info =
-        PreprocessInputTensorInfo::preprocess_input_info_get_tensor_info(&input_info);
+    let mut input_tensor_info = input_info.preprocess_input_info_get_tensor_info();
     input_tensor_info.preprocess_input_tensor_set_from(&tensor);
 
     let layout_tensor_string = "NHWC";
     let input_layout = Layout::new(&layout_tensor_string);
-    PreprocessInputTensorInfo::preprocess_input_tensor_set_layout(
-        &input_tensor_info,
+    input_tensor_info.preprocess_input_tensor_set_layout(
         &input_layout,
     );
+    let mut preprocess_steps = input_info.get_preprocess_steps();
+    preprocess_steps.preprocess_steps_resize( 0);
 
-    let preprocess_steps = PreprocessSteps::get_preprocess_steps(&input_info);
-    PreprocessSteps::preprocess_steps_resize(&preprocess_steps, 0);
-
-    let model_info = PrePostprocess::get_model_info(input_info);
+    let model_info = input_info.get_model_info();
     let layout_string = "NCHW";
     let model_layout = Layout::new(&layout_string);
-    PrePostprocess::model_info_set_layout(&model_info, model_layout);
+    model_info.model_info_set_layout(model_layout);
 
-    pre_post_process.build(&mut network);
+    let output_info = pre_post_process.get_output_info_by_index(0);
+    let output_tensor_info = output_info.get_output_info_get_tensor_info();
+    output_tensor_info.preprocess_set_element_type(ElementType::F32);
 
-    let input_port = network.get_input_by_index(0).unwrap(); //got port
+    pre_post_process.build(&mut model);
+
+    let input_port = model.get_input_by_index(0).unwrap();
     assert_eq!(input_port.get_name().unwrap(), "input");
 
     //Set up output
-    let output_port = network.get_output_by_index(0).unwrap(); //got output port
+    let output_port = model.get_output_by_index(0).unwrap();
     assert_eq!(
         output_port.get_name().unwrap(),
         "MobilenetV2/Predictions/Reshape_1"
     );
 
-    // Load the network.
-    let mut executable_network = core.compile_model(network, "CPU").unwrap();
-    let mut infer_request = executable_network.create_infer_request().unwrap();
+    // Load the model.
+    let mut executable_model = core.compile_model(model, "CPU").unwrap();
+    let mut infer_request = executable_model.create_infer_request().unwrap();
 
     // Execute inference.
     infer_request.set_tensor("input", &tensor); /*.unwrap();*/

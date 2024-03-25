@@ -25,31 +25,25 @@
     clippy::len_without_is_empty
 )]
 
-mod blob;
+mod tensor;
 mod core;
 mod error;
-mod network;
+mod model;
 mod request;
 mod element_type;
 mod layout;
 mod port;
 mod prepostprocess;
-mod preprocess;
 mod shape;
 mod util;
 
 pub use crate::core::Core;
-pub use blob::Tensor;
+pub use tensor::Tensor;
 pub use element_type::ElementType;
 pub use error::{InferenceError, LoadingError, SetupError};
 pub use layout::Layout;
-pub use network::{CompiledModel, Model};
-pub use prepostprocess::PrePostprocess;
-pub use prepostprocess::PreprocessInputInfo;
-pub use prepostprocess::PreprocessInputModelInfo;
-pub use prepostprocess::PreprocessOutputInfo;
-pub use prepostprocess::PreprocessSteps;
-pub use preprocess::PreprocessInputTensorInfo;
+pub use model::{CompiledModel, Model};
+pub use prepostprocess::{PrePostprocess, PreprocessInputInfo, PreprocessInputModelInfo, PreprocessInputTensorInfo, PreprocessOutputInfo, PreprocessOutputTensorInfo, PreprocessSteps};
 pub use shape::Shape;
 pub use request::InferRequest;
 pub use port::Port;

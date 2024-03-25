@@ -2,18 +2,16 @@
 //! [API](https://docs.openvinotoolkit.org/latest/ie_c_api/modules.html).
 
 use crate::{cstr, drop_using_function, try_unsafe, util::Result};
-use crate::{
-    error::{LoadingError, SetupError},
-    network::{CompiledModel, Model},
-};
+use crate::error::{LoadingError, SetupError};
+use crate::{model::CompiledModel, Model,};
 
 use openvino_sys::{
-    self, ov_core_compile_model, ov_core_create, ov_core_free, ov_core_read_model, ov_core_t,
+    self, ov_core_compile_model, ov_core_create, ov_core_create_with_config, ov_core_free, ov_core_read_model, ov_core_t
 };
 
 /// See [Core](https://docs.openvinotoolkit.org/latest/classInferenceEngine_1_1Core.html).
 pub struct Core {
-    instance: *mut ov_core_t,
+    pub(crate) instance: *mut ov_core_t,
 }
 drop_using_function!(Core, ov_core_free);
 
@@ -21,11 +19,17 @@ unsafe impl Send for Core {}
 
 impl Core {
     /// Construct a new OpenVINO [`Core`]--this is the primary entrypoint for constructing and using
-    /// inference networks. Because this function may load OpenVINO's shared libraries at runtime,
+    /// inference models. Because this function may load OpenVINO's shared libraries at runtime,
     /// there are more ways than usual that this function can fail (e.g., [`LoadingError`]s).
-    pub fn new(xml_config_file: Option<&str>) -> std::result::Result<Core, SetupError> {
-        openvino_sys::library::load().map_err(LoadingError::SystemFailure)?;
+    pub fn new() -> Result<Self> {
+        let mut instance = std::ptr::null_mut();
+        try_unsafe!(ov_core_create(std::ptr::addr_of_mut!(instance)))?;
+        Ok(Self { instance })
+    }
 
+    //return Self
+    pub fn new_with_config(xml_config_file: Option<&str>) -> std::result::Result<Core, SetupError> {
+        openvino_sys::library::load().map_err(LoadingError::SystemFailure)?;
         let file = if let Some(file) = xml_config_file {
             cstr!(file.to_string())
         } else if let Some(file) = openvino_finder::find_plugins_xml() {
@@ -38,13 +42,13 @@ impl Core {
         };
 
         let mut instance = std::ptr::null_mut();
-        try_unsafe!(ov_core_create(std::ptr::addr_of_mut!(instance)))?;
+        try_unsafe!(ov_core_create_with_config(file, std::ptr::addr_of_mut!(instance)))?;
         Ok(Core { instance })
     }
 
-    /// Read a [`CNNNetwork`] from a pair of files: `model_path` points to an XML file containing the
-    /// OpenVINO network IR and `weights_path` points to the binary weights file.
-    pub fn read_network_from_file(
+    /// Read a [`CNNmodel`] from a pair of files: `model_path` points to an XML file containing the
+    /// OpenVINO model IR and `weights_path` points to the binary weights file.
+    pub fn read_model_from_file(
         &mut self,
         model_path: &str,
         weights_path: &str,
@@ -59,15 +63,15 @@ impl Core {
         Ok(Model { instance })
     }
 
-    /// Instantiate a [`CNNNetwork`] as an [`ExecutableNetwork`] on the specified `device`.
-    pub fn compile_model(&mut self, network: Model, device: &str) -> Result<CompiledModel> {
+    /// Instantiate a [`CNNmodel`] as an [`Executablemodel`] on the specified `device`.
+    pub fn compile_model(&mut self, model: Model, device: &str) -> Result<CompiledModel> {
         let mut compiled_model = CompiledModel {
             instance: std::ptr::null_mut(),
         };
         let num_property_args = 0;
         try_unsafe!(ov_core_compile_model(
             self.instance,
-            network.instance,
+            model.instance,
             cstr!(device),
             num_property_args,
             std::ptr::addr_of_mut!(compiled_model.instance)
@@ -75,3 +79,40 @@ impl Core {
         Ok(compiled_model)
     }
 }
+
+//Tests for core.rs
+/*
+#[cfg(test)]
+mod core_tests {
+    use super::*;
+    #[test]
+    fn test_new() {
+        let core = Core::new();
+        assert!(core.is_ok());
+    }
+
+    #[test]
+    fn test_new_with_config() {
+        let core = Core::new_with_config(None);
+        assert!(core.is_ok());
+    }
+
+    #[test]
+    fn test_read_model_from_file() {
+        let mut core = Core::new().unwrap();
+        let model_path = "path/to/model.xml";
+        let weights_path = "path/to/weights.bin";
+        let model = core.read_model_from_file(model_path, weights_path);
+        assert!(model.is_ok());
+    }
+
+    #[test]
+    fn test_compile_model() {
+        let mut core = Core::new().unwrap();
+        let model = Model { instance: std::ptr::null_mut() };
+        let device = "CPU";
+        let compiled_model = core.compile_model(model, device);
+        assert!(compiled_model.is_ok());
+    }
+}
+*/

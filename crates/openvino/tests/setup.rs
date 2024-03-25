@@ -7,10 +7,10 @@ use std::fs;
 
 #[test]
 fn read_network() {
-    let mut core = Core::new(None).unwrap();
+    let mut core = Core::new().unwrap();
     let model = fs::read(Fixture::graph()).unwrap();
     let weights = fs::read(Fixture::weights()).unwrap();
-    let network = core.read_network_from_buffer(&model, &weights).unwrap();
+    let network = core.read_model_from_buffer(&model, &weights).unwrap();
 
     // Check the number of inputs and outputs.
     assert_eq!(network.get_inputs_len(), Ok(1));
