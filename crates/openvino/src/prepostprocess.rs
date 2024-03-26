@@ -1,6 +1,6 @@
 use std::ffi::CString;
 use openvino_sys::{
-    ov_preprocess_input_info_free, ov_preprocess_input_info_get_model_info, ov_preprocess_input_info_get_preprocess_steps, ov_preprocess_input_info_get_tensor_info, ov_preprocess_input_info_t, ov_preprocess_input_model_info_free, ov_preprocess_input_model_info_set_layout, ov_preprocess_input_model_info_t, ov_preprocess_input_tensor_info, ov_preprocess_input_tensor_info_free, ov_preprocess_input_tensor_info_set_from, ov_preprocess_input_tensor_info_set_layout, ov_preprocess_input_tensor_info_t, ov_preprocess_output_info_free, ov_preprocess_output_info_get_tensor_info, ov_preprocess_output_info_t, ov_preprocess_output_set_element_type, ov_preprocess_output_tensor_info_t, ov_preprocess_prepostprocessor_build, ov_preprocess_prepostprocessor_create, ov_preprocess_prepostprocessor_free, ov_preprocess_prepostprocessor_get_input_info, ov_preprocess_prepostprocessor_get_input_info_by_index, ov_preprocess_prepostprocessor_get_input_info_by_name, ov_preprocess_prepostprocessor_get_output_info_by_index, ov_preprocess_prepostprocessor_get_output_info_by_name, ov_preprocess_prepostprocessor_t, ov_preprocess_preprocess_steps_free, ov_preprocess_preprocess_steps_resize, ov_preprocess_preprocess_steps_t, ov_preprocess_resize_algorithm_e_RESIZE_LINEAR
+    ov_preprocess_input_info_free, ov_preprocess_input_info_get_model_info, ov_preprocess_input_info_get_preprocess_steps, ov_preprocess_input_info_get_tensor_info, ov_preprocess_input_info_t, ov_preprocess_input_model_info_free, ov_preprocess_input_model_info_set_layout, ov_preprocess_input_model_info_t, ov_preprocess_input_tensor_info, ov_preprocess_input_tensor_info_free, ov_preprocess_input_tensor_info_set_from, ov_preprocess_input_tensor_info_set_layout, ov_preprocess_input_tensor_info_t, ov_preprocess_output_info_free, ov_preprocess_output_info_get_tensor_info, ov_preprocess_output_info_t, ov_preprocess_output_set_element_type, ov_preprocess_output_tensor_info_t, ov_preprocess_prepostprocessor_build, ov_preprocess_prepostprocessor_create, ov_preprocess_prepostprocessor_free, ov_preprocess_prepostprocessor_get_input_info, ov_preprocess_prepostprocessor_get_input_info_by_index, ov_preprocess_prepostprocessor_get_input_info_by_name, ov_preprocess_prepostprocessor_get_output_info_by_index, ov_preprocess_prepostprocessor_get_output_info_by_name, ov_preprocess_prepostprocessor_t, ov_preprocess_preprocess_steps_convert_layout, ov_preprocess_preprocess_steps_free, ov_preprocess_preprocess_steps_resize, ov_preprocess_preprocess_steps_t, ov_preprocess_resize_algorithm_e_RESIZE_LINEAR
 };
 
 use crate::{drop_using_function, layout::Layout, try_unsafe, ElementType, Model, Tensor};
@@ -254,6 +254,14 @@ impl PreprocessSteps {
         let code = try_unsafe!(ov_preprocess_preprocess_steps_resize(
             self.instance,
             0,
+        ));
+        assert_eq!(code, Ok(()));
+    }
+
+    pub fn preprocess_convert_layout(&self, layout: Layout) -> () {
+        let code = try_unsafe!(ov_preprocess_preprocess_steps_convert_layout(
+            self.instance,
+            layout.instance,
         ));
         assert_eq!(code, Ok(()));
     }
