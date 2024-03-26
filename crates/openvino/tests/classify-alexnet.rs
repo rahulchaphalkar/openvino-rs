@@ -5,8 +5,7 @@ mod util;
 
 use fixtures::alexnet::Fixture;
 use openvino::{
-    Core, ElementType, Layout, PrePostprocess, PreprocessInputTensorInfo, PreprocessSteps,
-    Shape, Tensor,
+    Core, ElementType, Layout, PrePostprocess, Shape, Tensor,
 };
 use std::fs;
 use util::{Prediction, Predictions};
@@ -26,7 +25,6 @@ fn classify_alexnet() {
 
     //Set up input
     let data = fs::read(Fixture::tensor()).unwrap();
-    //let input_shape = Shape::new(&vec![1, 3, 227, 227]);
     let input_shape = Shape::new(&vec![1, 227, 227, 3]);
     let element_type = ElementType::F32;
     let tensor = Tensor::new_from_host_ptr(element_type, input_shape, &data).unwrap();
@@ -41,8 +39,6 @@ fn classify_alexnet() {
     input_tensor_info.preprocess_input_tensor_set_layout(
         &input_layout,
     );
-    let mut preprocess_steps = input_info.get_preprocess_steps();
-    preprocess_steps.preprocess_steps_resize( 0);
 
     let model_info = input_info.get_model_info();
     let layout_string = "NCHW";
