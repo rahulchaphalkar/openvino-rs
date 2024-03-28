@@ -25,7 +25,7 @@ unsafe impl Send for Model {}
 unsafe impl Sync for Model {}
 
 impl Model {
-
+    /// Create a new instance of the Model struct.
     pub fn new() -> Result<Self> {
         let instance = std::ptr::null_mut();
         Ok(Self { instance })
@@ -45,6 +45,7 @@ impl Model {
         Ok(num)
     }
 
+    /// Retrieve the input port by index.
     pub fn get_input_by_index(&self, index: usize) -> Result<Port> {
         let mut port = std::ptr::null_mut();
         try_unsafe!(ov_model_const_input_by_index(
@@ -55,6 +56,7 @@ impl Model {
         Ok(Port { instance: port })
     }
 
+    /// Retrieve the output port by index.
     pub fn get_output_by_index(&self, index: usize) -> Result<Port> {
         let mut port = std::ptr::null_mut();
         try_unsafe!(ov_model_const_output_by_index(
@@ -65,6 +67,7 @@ impl Model {
         Ok(Port { instance: port })
     }
 
+    /// Retrieve the constant output port by index.
     pub fn get_const_output_by_index(&self, index: usize) -> Result<Port> {
         let mut port = std::ptr::null_mut();
         try_unsafe!(ov_model_const_output_by_index(
@@ -77,7 +80,7 @@ impl Model {
 }
 
 /// See
-/// [`Executablemodel`](https://docs.openvinotoolkit.org/latest/classInferenceEngine_1_1Executablemodel.html).
+/// [`CompiledModel`](https://docs.openvino.ai/2023.3/api/c_cpp_api/group__ov__compiled__model__c__api.html).
 pub struct CompiledModel {
     pub(crate) instance: *mut ov_compiled_model_t,
 }
