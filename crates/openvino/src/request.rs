@@ -6,7 +6,7 @@ use openvino_sys::{
 };
 
 /// See
-/// [`InferRequest`](https://docs.openvinotoolkit.org/latest/classInferenceEngine_1_1InferRequest.html).
+/// [`InferRequest`](https://docs.openvino.ai/2023.3/api/c_cpp_api/group__ov__tensor__c__api.html).
 pub struct InferRequest {
     pub(crate) instance: *mut ov_infer_request_t,
 }
@@ -16,7 +16,7 @@ unsafe impl Send for InferRequest {}
 unsafe impl Sync for InferRequest {}
 
 impl InferRequest {
-    /// Assign a [tensor] to the input (i.e. `name`) on the network.
+    /// Assign a [tensor] to the input on the model.
     pub fn set_tensor(&mut self, name: &str, tensor: &Tensor) -> () {
         try_unsafe!(ov_infer_request_set_tensor(
             self.instance,
@@ -25,7 +25,7 @@ impl InferRequest {
         ));
     }
 
-    /// Retrieve a [tensor] from the output (i.e. `name`) on the network.
+    /// Retrieve a [tensor] from the output on the model.
     pub fn get_tensor(&self, name: &str) -> Result<Tensor> {
         let mut tensor = std::ptr::null_mut();
         try_unsafe!(ov_infer_request_get_tensor(

@@ -1,3 +1,4 @@
+//! This module provides functionality related to Tensor objects.
 use crate::element_type::ElementType;
 use crate::shape::Shape;
 use crate::{drop_using_function, try_unsafe, util::Result};
@@ -7,19 +8,24 @@ use openvino_sys::{
     ov_tensor_get_size, ov_tensor_set_shape, ov_tensor_t,
 };
 
-/// See [`Blob`](https://docs.openvinotoolkit.org/latest/classInferenceEngine_1_1Blob.html).
+/// See [`Tensor`](https://docs.openvino.ai/2023.3/api/c_cpp_api/group__ov__tensor__c__api.html).
 pub struct Tensor {
+    /// Pointer to the underlying OpenVINO tensor.
     pub instance: *mut ov_tensor_t,
 }
 drop_using_function!(Tensor, ov_tensor_free);
 
 impl Tensor {
-    /// Create a new [`Tensor`] by copying data in to the OpenVINO-allocated memory.
+    /// Create a new [`Tensor`].
     ///
-    /// # Panics
+    /// # Arguments
     ///
-    /// This function will panic if the number of bytes passed in `data` does not match the expected
-    /// size of the tensor `description`.
+    /// * `data_type` - The data type of the tensor.
+    /// * `shape` - The shape of the tensor.
+    ///
+    /// # Returns
+    ///
+    /// A new `Tensor` object.
     pub fn new(data_type: ElementType, shape: Shape) -> Result<Self> {
         let mut tensor = std::ptr::null_mut();
         let element_type = data_type as u32;
@@ -31,6 +37,17 @@ impl Tensor {
         Ok(Self { instance: tensor })
     }
 
+    /// Create a new [`Tensor`] from a host pointer.
+    ///
+    /// # Arguments
+    ///
+    /// * `data_type` - The data type of the tensor.
+    /// * `shape` - The shape of the tensor.
+    /// * `data` - The data buffer.
+    ///
+    /// # Returns
+    ///
+    /// A new `Tensor` object.
     pub fn new_from_host_ptr(
         data_type: ElementType,
         shape: Shape,
@@ -48,6 +65,15 @@ impl Tensor {
         Ok(Self { instance: tensor })
     }
 
+    /// (Re)Set the shape of the tensor to a new shape
+    ///
+    /// # Arguments
+    ///
+    /// * `shape` - The new shape of the tensor.
+    ///
+    /// # Returns
+    ///
+    /// A new `Tensor` object with the updated shape.
     pub fn set_shape(&self, shape: &Shape) -> Result<Self> {
         try_unsafe!(ov_tensor_set_shape(self.instance, shape.instance));
         Ok(Self {
@@ -55,6 +81,11 @@ impl Tensor {
         })
     }
 
+    /// Get the shape of the tensor.
+    ///
+    /// # Returns
+    ///
+    /// The shape of the tensor.
     pub fn get_shape(&self) -> Result<Shape> {
         let mut instance = ov_shape_t {
             rank: 0,
@@ -67,6 +98,11 @@ impl Tensor {
         Ok(Shape { instance })
     }
 
+    /// Get the data type of elements of the tensor.
+    ///
+    /// # Returns
+    ///
+    /// The data type of elements of the tensor.
     pub fn get_element_type(&self) -> Result<u32> {
         let mut element_type = ElementType::Undefined as u32;
         try_unsafe!(ov_tensor_get_element_type(
@@ -76,12 +112,22 @@ impl Tensor {
         Ok(element_type)
     }
 
+    /// Get the number of elements in the tensor. Product of all dimensions e.g. 1*3*227*227
+    ///
+    /// # Returns
+    ///
+    /// The number of elements in the tensor.
     pub fn get_size(&self) -> Result<usize> {
         let mut elements_size = 0;
         try_unsafe!(ov_tensor_get_size(self.instance, std::ptr::addr_of_mut!(elements_size)));
         Ok(elements_size)
     }
 
+    /// Get the size of the tensor in bytes.
+    ///
+    /// # Returns
+    ///
+    /// The size of the tensor in bytes.
     pub fn get_byte_size(&self) -> Result<usize> {
         let mut byte_size: usize = 0;
         try_unsafe!(ov_tensor_get_byte_size(
@@ -91,11 +137,15 @@ impl Tensor {
         Ok(byte_size)
     }
 
+    /// Get a mutable reference to the data of the tensor.
+    ///
+    /// # Returns
+    ///
+    /// A mutable reference to the data of the tensor.
     pub fn get_data<T>(&mut self) -> Result<&mut [T]> {
         let mut data = std::ptr::null_mut();
         try_unsafe!(ov_tensor_data(
             self.instance,
-            //&mut data,
             std::ptr::addr_of_mut!(data),
         ));
         let size = self.get_byte_size()? / std::mem::size_of::<T>();
@@ -103,6 +153,11 @@ impl Tensor {
         Ok(slice)
     }
 
+    /// Get a mutable reference to the buffer of the tensor.
+    ///
+    /// # Returns
+    ///
+    /// A mutable reference to the buffer of the tensor.
     pub fn buffer_mut(&mut self) -> Result<&mut [u8]> {
         let mut buffer = std::ptr::null_mut();
         try_unsafe!(ov_tensor_data(

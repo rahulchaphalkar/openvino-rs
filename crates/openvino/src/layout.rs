@@ -2,12 +2,22 @@ use std::ffi::CString;
 use openvino_sys::{ov_layout_create, ov_layout_free, ov_layout_t};
 use crate::{drop_using_function, try_unsafe};
 
+/// Represents a layout.
 pub struct Layout {
     pub(crate) instance: *mut ov_layout_t,
 }
 drop_using_function!(Layout, ov_layout_free);
 
 impl Layout {
+    /// Creates a new layout with the given description.
+    ///
+    /// # Arguments
+    ///
+    /// * `layout_desc` - The description of the layout.
+    ///
+    /// # Returns
+    ///
+    /// A new `Layout` instance.
     pub fn new(layout_desc: &str) -> Self {
         let mut layout = std::ptr::null_mut();
         let c_layout_desc = CString::new(layout_desc).unwrap();

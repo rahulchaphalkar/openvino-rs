@@ -1,11 +1,15 @@
 use std::convert::TryInto;
 use openvino_sys::{ov_shape_create, ov_shape_free, ov_shape_t};
-use crate::{try_unsafe,util::Result};
+use crate::{try_unsafe, util::Result};
+
+/// Represents a shape in OpenVINO.
 pub struct Shape {
     pub(crate) instance: ov_shape_t,
 }
 
 impl Drop for Shape {
+    /// Drops the Shape instance and frees the associated memory.
+    //Not using drop! macro since ov_shape_free returns an error code unlike other free methods
     fn drop(&mut self) {
         let code = unsafe { ov_shape_free(std::ptr::addr_of_mut!(self.instance)) };
         assert_eq!(code, 0);
@@ -15,6 +19,11 @@ impl Drop for Shape {
 }
 
 impl Shape {
+    /// Creates a new Shape instance with the given dimensions.
+    ///
+    /// # Arguments
+    ///
+    /// * `dimensions` - A vector of dimensions for the shape.
     pub fn new(dimensions: &Vec<i64>) -> Self {
         let mut shape = ov_shape_t {
             rank: 8,
@@ -29,10 +38,14 @@ impl Shape {
         Self { instance: shape }
     }
 
+    /// Returns the rank of the shape.
+    ///
+    /// # Returns
+    ///
+    /// The rank of the shape
     pub fn get_rank(&self) -> Result<i64> {
         Ok(self.instance.rank)
     }
-
 }
 
 #[cfg(test)]
