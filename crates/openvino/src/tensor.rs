@@ -14,7 +14,7 @@ pub struct Tensor {
 drop_using_function!(Tensor, ov_tensor_free);
 
 impl Tensor {
-    /// Create a new [`Blob`] by copying data in to the OpenVINO-allocated memory.
+    /// Create a new [`Tensor`] by copying data in to the OpenVINO-allocated memory.
     ///
     /// # Panics
     ///
@@ -48,8 +48,8 @@ impl Tensor {
         Ok(Self { instance: tensor })
     }
 
-    pub fn set_shape(&self, shape: Shape) -> Result<Self> {
-        try_unsafe!(ov_tensor_set_shape(self.instance, shape.instance,));
+    pub fn set_shape(&self, shape: &Shape) -> Result<Self> {
+        try_unsafe!(ov_tensor_set_shape(self.instance, shape.instance));
         Ok(Self {
             instance: self.instance,
         })
@@ -77,9 +77,9 @@ impl Tensor {
     }
 
     pub fn get_size(&self) -> Result<usize> {
-        let elements_size = std::ptr::null_mut();
-        try_unsafe!(ov_tensor_get_size(self.instance, elements_size,));
-        Ok(elements_size as usize)
+        let mut elements_size = 0;
+        try_unsafe!(ov_tensor_get_size(self.instance, std::ptr::addr_of_mut!(elements_size)));
+        Ok(elements_size)
     }
 
     pub fn get_byte_size(&self) -> Result<usize> {
@@ -88,7 +88,7 @@ impl Tensor {
             self.instance,
             std::ptr::addr_of_mut!(byte_size),
         ));
-        Ok(byte_size as usize)
+        Ok(byte_size)
     }
 
     pub fn get_data<T>(&mut self) -> Result<&mut [T]> {
@@ -119,63 +119,42 @@ impl Tensor {
 
 #[cfg(test)]
 mod tests {
-
-}
-/*
-#[cfg(test)]
-mod tests {
     use super::*;
-    use crate::{Layout, Precision};
+    use crate::{Shape, ElementType};
 
     #[test]
-    #[should_panic]
-    fn invalid_blob_size() {
-        let desc = TensorDesc::new(Layout::NHWC, &[1, 2, 2, 2], Precision::U8);
-        // Blob should be 1x2x2x2 = 8 bytes but we pass in 7 bytes:
-        let _ = Blob::new(&desc, &[0; 7]).unwrap();
+    fn test_create_tensor() {
+        let shape = Shape::new(&vec![1, 3, 227, 227]);
+        let tensor = Tensor::new(ElementType::F32, shape).unwrap();
+        assert!(!tensor.instance.is_null());
     }
 
     #[test]
-    fn buffer_conversion() {
-        // In order to ensure runtime-linked libraries are linked with, we must:
-        openvino_sys::library::load().expect("unable to find an OpenVINO shared library");
-
-        const LEN: usize = 200 * 100;
-        let desc = TensorDesc::new(Layout::HW, &[200, 100], Precision::U16);
-
-        // Provide a u8 slice to create a u16 blob (twice as many items).
-        let mut blob = Blob::new(&desc, &[0; LEN * 2]).unwrap();
-
-        assert_eq!(blob.len().unwrap(), LEN);
-        assert_eq!(
-            blob.byte_len().unwrap(),
-            LEN * 2,
-            "we should have twice as many bytes (u16 = u8 * 2)"
-        );
-        assert_eq!(
-            blob.buffer().unwrap().len(),
-            LEN * 2,
-            "we should have twice as many items (u16 = u8 * 2)"
-        );
-        assert_eq!(
-            unsafe { blob.buffer_mut_as_type::<f32>() }.unwrap().len(),
-            LEN / 2,
-            "we should have half as many items (u16 = f32 / 2)"
-        );
+    fn test_get_shape() {
+        let tensor = Tensor::new(ElementType::F32, Shape::new(&vec![1, 3, 227, 227])).unwrap();
+        let shape = tensor.get_shape().unwrap();
+        assert_eq!(shape.get_rank().unwrap(), 4);
     }
 
     #[test]
-    fn tensor_desc() {
-        openvino_sys::library::load().expect("unable to find an OpenVINO shared library");
-
-        let desc = TensorDesc::new(Layout::NHWC, &[1, 2, 2, 2], Precision::U8);
-        let blob = Blob::new(&desc, &[0; 8]).unwrap();
-        let desc2 = blob.tensor_desc().unwrap();
-
-        // Both TensorDesc's should be equal
-        assert_eq!(desc.layout(), desc2.layout());
-        assert_eq!(desc.dims(), desc2.dims());
-        assert_eq!(desc.precision(), desc2.precision());
+    fn test_get_element_type() {
+        let tensor = Tensor::new(ElementType::F32, Shape::new(&vec![1, 3, 227, 227])).unwrap();
+        let element_type = tensor.get_element_type().unwrap();
+        assert_eq!(element_type, ElementType::F32 as u32);
     }
+
+    #[test]
+    fn test_get_size() {
+        let tensor = Tensor::new(ElementType::F32, Shape::new(&vec![1, 3, 227, 227])).unwrap();
+        let size = tensor.get_size().unwrap();
+        assert_eq!(size, 1 * 3 * 227 * 227);
+    }
+
+    #[test]
+    fn test_get_byte_size() {
+        let tensor = Tensor::new(ElementType::F32, Shape::new(&vec![1, 3, 227, 227])).unwrap();
+        let byte_size = tensor.get_byte_size().unwrap();
+        assert_eq!(byte_size, 1 * 3 * 227 * 227 * std::mem::size_of::<f32>() as usize);
+    }
+
 }
-*/

@@ -1,6 +1,6 @@
 use std::convert::TryInto;
 use openvino_sys::{ov_shape_create, ov_shape_free, ov_shape_t};
-use crate::try_unsafe;
+use crate::{try_unsafe,util::Result};
 pub struct Shape {
     pub(crate) instance: ov_shape_t,
 }
@@ -29,7 +29,8 @@ impl Shape {
         Self { instance: shape }
     }
 
-    pub fn rank(&self) -> i64 {
-        self.instance.rank
+    pub fn get_rank(&self) -> Result<i64> {
+        Ok(self.instance.rank)
     }
+
 }

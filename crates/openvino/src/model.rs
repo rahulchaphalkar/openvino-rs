@@ -25,6 +25,14 @@ unsafe impl Send for Model {}
 unsafe impl Sync for Model {}
 
 impl Model {
+    //new model
+    pub fn new() -> Result<Self> {
+        let instance = std::ptr::null_mut();
+        //try_unsafe!(ov_model_create(std::ptr::addr_of_mut!(instance)))?;
+
+        Ok(Self { instance })
+    }
+
     /// Retrieve the number of model inputs.
     pub fn get_inputs_len(&self) -> Result<usize> {
         let mut num: usize = 0;
@@ -50,6 +58,16 @@ impl Model {
     }
 
     pub fn get_output_by_index(&self, index: usize) -> Result<Port> {
+        let mut port = std::ptr::null_mut();
+        try_unsafe!(ov_model_const_output_by_index(
+            self.instance,
+            index,
+            std::ptr::addr_of_mut!(port)
+        ))?;
+        Ok(Port { instance: port })
+    }
+
+    pub fn get_const_output_by_index(&self, index: usize) -> Result<Port> {
         let mut port = std::ptr::null_mut();
         try_unsafe!(ov_model_const_output_by_index(
             self.instance,
