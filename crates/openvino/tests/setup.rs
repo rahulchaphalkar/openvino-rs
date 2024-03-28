@@ -7,7 +7,12 @@ use openvino::Core;
 #[test]
 fn read_network() {
     let mut core = Core::new().unwrap();
-    let read_model = core.read_model_from_file(&Fixture::graph().to_string_lossy(), &Fixture::weights().to_string_lossy()).unwrap();
+    let read_model = core
+        .read_model_from_file(
+            &Fixture::graph().to_string_lossy(),
+            &Fixture::weights().to_string_lossy(),
+        )
+        .unwrap();
 
     // Check the number of inputs and outputs.
     assert_eq!(read_model.get_inputs_len(), Ok(1));

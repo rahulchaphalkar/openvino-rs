@@ -1,13 +1,14 @@
 //! Define the core interface between Rust and OpenVINO's C
 //! [API](https://docs.openvino.ai/2023.3/api/c_cpp_api/group__ov__core__c__api.html).
 
-use crate::{SetupError, Tensor};
-use crate::{cstr, drop_using_function, try_unsafe, util::Result};
 use crate::error::LoadingError;
-use crate::{model::CompiledModel, Model,};
+use crate::{cstr, drop_using_function, try_unsafe, util::Result};
+use crate::{model::CompiledModel, Model};
+use crate::{SetupError, Tensor};
 
 use openvino_sys::{
-    self, ov_core_compile_model, ov_core_create, ov_core_create_with_config, ov_core_free, ov_core_read_model, ov_core_read_model_from_memory_buffer, ov_core_t
+    self, ov_core_compile_model, ov_core_create, ov_core_create_with_config, ov_core_free,
+    ov_core_read_model, ov_core_read_model_from_memory_buffer, ov_core_t,
 };
 
 /// See [Core](https://docs.openvino.ai/2023.3/api/c_cpp_api/group__ov__core__c__api.html).
@@ -41,17 +42,16 @@ impl Core {
         };
 
         let mut instance = std::ptr::null_mut();
-        try_unsafe!(ov_core_create_with_config(file, std::ptr::addr_of_mut!(instance)))?;
+        try_unsafe!(ov_core_create_with_config(
+            file,
+            std::ptr::addr_of_mut!(instance)
+        ))?;
         Ok(Self { instance })
     }
 
     /// Read a Model from a pair of files: `model_path` points to an XML file containing the
     /// OpenVINO model IR and `weights_path` points to the binary weights file.
-    pub fn read_model_from_file(
-        &mut self,
-        model_path: &str,
-        weights_path: &str,
-    ) -> Result<Model> {
+    pub fn read_model_from_file(&mut self, model_path: &str, weights_path: &str) -> Result<Model> {
         let mut instance = std::ptr::null_mut();
         try_unsafe!(ov_core_read_model(
             self.instance,

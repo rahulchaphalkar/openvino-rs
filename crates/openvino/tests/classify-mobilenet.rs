@@ -5,9 +5,7 @@ mod fixtures;
 mod util;
 
 use fixtures::mobilenet::Fixture;
-use openvino::{
-    Core, ElementType, Layout, PrePostprocess, Shape, Tensor, Model,
-};
+use openvino::{Core, ElementType, Layout, Model, PrePostprocess, Shape, Tensor};
 use std::fs;
 use util::{Prediction, Predictions};
 
@@ -48,16 +46,20 @@ fn classify_mobilenet() {
     let pre_post_process = PrePostprocess::new(&mut model).unwrap();
     let input_info = pre_post_process.get_input_info_by_name("input").unwrap();
     let mut input_tensor_info = input_info.preprocess_input_info_get_tensor_info().unwrap();
-    input_tensor_info.preprocess_input_tensor_set_from(&tensor).unwrap();
+    input_tensor_info
+        .preprocess_input_tensor_set_from(&tensor)
+        .unwrap();
 
     //set layout of input tensor
     let layout_tensor_string = "NHWC";
     let input_layout = Layout::new(&layout_tensor_string).unwrap();
-    input_tensor_info.preprocess_input_tensor_set_layout(&input_layout).unwrap();
+    input_tensor_info
+        .preprocess_input_tensor_set_layout(&input_layout)
+        .unwrap();
 
     //set any preprocessing steps
     let mut preprocess_steps = input_info.get_preprocess_steps().unwrap();
-    preprocess_steps.preprocess_steps_resize( 0).unwrap();
+    preprocess_steps.preprocess_steps_resize(0).unwrap();
     let model_info = input_info.get_model_info().unwrap();
 
     //set model input layout
@@ -67,7 +69,9 @@ fn classify_mobilenet() {
 
     let output_info = pre_post_process.get_output_info_by_index(0).unwrap();
     let output_tensor_info = output_info.get_output_info_get_tensor_info().unwrap();
-    output_tensor_info.preprocess_set_element_type(ElementType::F32).unwrap();
+    output_tensor_info
+        .preprocess_set_element_type(ElementType::F32)
+        .unwrap();
 
     pre_post_process.build(&mut new_model).unwrap();
 

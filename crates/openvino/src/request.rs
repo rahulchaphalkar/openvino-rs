@@ -1,5 +1,5 @@
-use crate::{cstr, drop_using_function, try_unsafe, util::Result};
 use crate::tensor::Tensor;
+use crate::{cstr, drop_using_function, try_unsafe, util::Result};
 use openvino_sys::{
     ov_infer_request_free, ov_infer_request_get_tensor, ov_infer_request_infer,
     ov_infer_request_set_tensor, ov_infer_request_t,
