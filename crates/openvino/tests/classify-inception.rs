@@ -76,7 +76,7 @@ fn classify_inception() {
     infer_request.set_tensor("input", &tensor); /*.unwrap();*/
     infer_request.infer().unwrap();
     let mut results = infer_request
-        .get_tensor(output_port.get_name().unwrap())
+        .get_tensor(&output_port.get_name().unwrap())
         .unwrap();
 
     let buffer = results.get_data::<f32>().unwrap().to_vec();

@@ -1,12 +1,13 @@
 //! Define the core interface between Rust and OpenVINO's C
 //! [API](https://docs.openvinotoolkit.org/latest/ie_c_api/modules.html).
 
+use crate::Tensor;
 use crate::{cstr, drop_using_function, try_unsafe, util::Result};
 use crate::error::{LoadingError, SetupError};
 use crate::{model::CompiledModel, Model,};
 
 use openvino_sys::{
-    self, ov_core_compile_model, ov_core_create, ov_core_create_with_config, ov_core_free, ov_core_read_model, ov_core_t
+    self, ov_core_compile_model, ov_core_create, ov_core_create_with_config, ov_core_free, ov_core_read_model, ov_core_read_model_from_memory_buffer, ov_core_t
 };
 
 /// See [Core](https://docs.openvinotoolkit.org/latest/classInferenceEngine_1_1Core.html).
@@ -58,6 +59,22 @@ impl Core {
             self.instance,
             cstr!(model_path),
             cstr!(weights_path),
+            std::ptr::addr_of_mut!(instance)
+        ))?;
+        Ok(Model { instance })
+    }
+
+    pub fn read_model_from_buffer(
+        &mut self,
+        model_str: &str,
+        weights_buffer: Tensor,
+    ) -> Result<Model> {
+        let mut instance = std::ptr::null_mut();
+        try_unsafe!(ov_core_read_model_from_memory_buffer(
+            self.instance,
+            cstr!(model_str),
+            model_str.len(),
+            weights_buffer.instance,
             std::ptr::addr_of_mut!(instance)
         ))?;
         Ok(Model { instance })
