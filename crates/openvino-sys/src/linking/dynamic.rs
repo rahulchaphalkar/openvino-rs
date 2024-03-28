@@ -9,9 +9,7 @@ macro_rules! link {
                 pub fn $name:ident($($pname:ident: $pty:ty),* $(,)? $(,...)? ) $(-> $ret:ty)*;
             }
         )+
-    ) =>
-
-            {
+    ) => (
                 /// When compiled as a dynamically-linked library, this function does nothing. It exists to
                 /// provide a consistent API with the runtime-linked version.
                 ///
@@ -30,7 +28,5 @@ macro_rules! link {
                         pub fn $name($($pname: $pty),*) $(-> $ret)*;
                     )+
                 }
-            };
-
-
+            )
 }
