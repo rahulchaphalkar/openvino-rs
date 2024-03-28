@@ -3,18 +3,8 @@
 //!
 //! [openvino]: https://crates.io/crates/openvino
 //! [README]: https://github.com/intel/openvino-rs
-//!
-//! Check the loaded version of OpenVINO:
-//! ```
-//! assert!(openvino::version().starts_with("2"))
-//! ```
-//!
-//! Most interaction with OpenVINO begins with instantiating a [Core]:
-//! ```
-//! let _ = openvino::Core::new().expect("to instantiate the OpenVINO library");
-//! ```
 
-//#![deny(missing_docs)]
+#![deny(missing_docs)]
 #![deny(clippy::all)]
 #![warn(clippy::pedantic)]
 #![warn(clippy::cargo)]
@@ -56,11 +46,32 @@ pub use port::Port;
 pub fn version() -> String {
     use std::ffi::CStr;
     openvino_sys::load().expect("to have an OpenVINO shared library available");
-    let mut ov_version = std::ptr::null_mut();
-    unsafe { openvino_sys::ov_get_openvino_version(ov_version) };
-    let str_version = unsafe { CStr::from_ptr((*ov_version).buildNumber) }
-        .to_string_lossy()
-        .into_owned();
-    unsafe { openvino_sys::ov_version_free(ov_version) };
-    str_version
+    //let mut ov_version = std::ptr::null_mut();
+    let mut ov_version = openvino_sys::ov_version_t {
+        // Initialize the fields to default values
+        description: std::ptr::null(),
+        buildNumber: std::ptr::null(),
+    };
+    let code = unsafe { openvino_sys::ov_get_openvino_version(&mut ov_version) };
+    assert_eq!(code, 0);
+    let version_ptr = { ov_version }.buildNumber;
+    let c_str_version = unsafe { CStr::from_ptr(version_ptr) };
+    let string_version = c_str_version.to_string_lossy().into_owned();
+    unsafe { openvino_sys::ov_version_free(std::ptr::addr_of_mut!(ov_version)) };
+    string_version
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_init_core() {
+        let _ = Core::new().expect("to instantiate the OpenVINO library");
+    }
+
+    #[test]
+    fn test_version() {
+        assert!(version().starts_with("2"));
+    }
 }
