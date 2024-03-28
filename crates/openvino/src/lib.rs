@@ -11,7 +11,7 @@
 //!
 //! Most interaction with OpenVINO begins with instantiating a [Core]:
 //! ```
-//! let _ = openvino::Core::new(None).expect("to instantiate the OpenVINO library");
+//! let _ = openvino::Core::new().expect("to instantiate the OpenVINO library");
 //! ```
 
 //#![deny(missing_docs)]

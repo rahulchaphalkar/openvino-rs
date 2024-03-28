@@ -26,6 +26,11 @@ unsafe impl Sync for Model {}
 
 impl Model {
 
+    pub fn new() -> Result<Self> {
+        let instance = std::ptr::null_mut();
+        Ok(Self { instance })
+    }
+
     /// Retrieve the number of model inputs.
     pub fn get_inputs_len(&self) -> Result<usize> {
         let mut num: usize = 0;
