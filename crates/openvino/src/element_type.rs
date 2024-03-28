@@ -8,6 +8,9 @@ pub enum ElementType {
     F16 = 4,
     F32 = 5,
     F64 = 6,
+    I4 = 7,
+    I8 = 8,
+    U8 = 14,
 }
 
 #[cfg(test)]

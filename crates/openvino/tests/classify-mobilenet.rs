@@ -6,13 +6,16 @@ mod util;
 
 use fixtures::mobilenet::Fixture;
 use openvino::{
-    Core, ElementType, Layout, PrePostprocess, Shape, Tensor,
+    Core, ElementType, Layout, PrePostprocess, Shape, Tensor, Model,
 };
 use std::fs;
 use util::{Prediction, Predictions};
 
 #[test]
 fn classify_mobilenet() {
+    //create an emtpy model for preprocess build
+    let mut new_model = Model::new().unwrap();
+
     //initialize openvino runtime core
     let mut core = Core::new().unwrap();
 
@@ -24,26 +27,40 @@ fn classify_mobilenet() {
         )
         .unwrap();
 
+    //Set up output port of model
+    let output_port = model.get_output_by_index(0).unwrap();
+    assert_eq!(
+        output_port.get_name().unwrap(),
+        "MobilenetV2/Predictions/Reshape_1"
+    );
+
+    //Set up input port of model
+    let input_port = model.get_input_by_index(0).unwrap();
+    assert_eq!(input_port.get_name().unwrap(), "input");
+
     //Set up input
     let data = fs::read(Fixture::tensor()).unwrap();
     let input_shape = Shape::new(&vec![1, 224, 224, 3]);
     let element_type = ElementType::F32;
     let tensor = Tensor::new_from_host_ptr(element_type, input_shape, &data).unwrap();
 
-    let pre_post_process = PrePostprocess::new(&model);
+    //configure preprocessing
+    let pre_post_process = PrePostprocess::new(&mut model);
     let input_info = pre_post_process.get_input_info_by_name("input");
     let mut input_tensor_info = input_info.preprocess_input_info_get_tensor_info();
     input_tensor_info.preprocess_input_tensor_set_from(&tensor);
 
+    //set layout of input tensor
     let layout_tensor_string = "NHWC";
     let input_layout = Layout::new(&layout_tensor_string);
-    input_tensor_info.preprocess_input_tensor_set_layout(
-        &input_layout,
-    );
+    input_tensor_info.preprocess_input_tensor_set_layout(&input_layout);
+
+    //set any preprocessing steps
     let mut preprocess_steps = input_info.get_preprocess_steps();
     preprocess_steps.preprocess_steps_resize( 0);
-
     let model_info = input_info.get_model_info();
+
+    //set model input layout
     let layout_string = "NCHW";
     let model_layout = Layout::new(&layout_string);
     model_info.model_info_set_layout(model_layout);
@@ -52,24 +69,18 @@ fn classify_mobilenet() {
     let output_tensor_info = output_info.get_output_info_get_tensor_info();
     output_tensor_info.preprocess_set_element_type(ElementType::F32);
 
-    pre_post_process.build(&mut model);
-
-    let input_port = model.get_input_by_index(0).unwrap();
-    assert_eq!(input_port.get_name().unwrap(), "input");
-
-    //Set up output
-    let output_port = model.get_output_by_index(0).unwrap();
-    assert_eq!(
-        output_port.get_name().unwrap(),
-        "MobilenetV2/Predictions/Reshape_1"
-    );
+    pre_post_process.build(&mut new_model);
 
     // Load the model.
-    let mut executable_model = core.compile_model(model, "CPU").unwrap();
+    let mut executable_model = core.compile_model(new_model, "CPU").unwrap();
+
+    //create an inference request
     let mut infer_request = executable_model.create_infer_request().unwrap();
 
-    // Execute inference.
+    //Prepare input
     infer_request.set_tensor("input", &tensor); /*.unwrap();*/
+
+    // Execute inference.
     infer_request.infer().unwrap();
     let mut results = infer_request
         .get_tensor(output_port.get_name().unwrap())
