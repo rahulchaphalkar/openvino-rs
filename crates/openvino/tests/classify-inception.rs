@@ -28,35 +28,30 @@ fn classify_inception() {
 
     //Set up input
     let data = fs::read(Fixture::tensor()).unwrap();
-    let input_shape = Shape::new(&vec![1, 299, 299, 3]);
+    let input_shape = Shape::new(&vec![1, 299, 299, 3]).unwrap();
     //let input_shape = Shape::new(&vec![1, 3, 299, 299]);
     let element_type = ElementType::F32;
     let tensor = Tensor::new_from_host_ptr(element_type, input_shape, &data).unwrap();
 
-    let pre_post_process = PrePostprocess::new(&mut model);
-    let input_info = pre_post_process.get_input_info_by_name("input");
-    let mut input_tensor_info = input_info.preprocess_input_info_get_tensor_info();
-    input_tensor_info.preprocess_input_tensor_set_from(&tensor);
+    let pre_post_process = PrePostprocess::new(&mut model).unwrap();
+    let input_info = pre_post_process.get_input_info_by_name("input").unwrap();
+    let mut input_tensor_info = input_info.preprocess_input_info_get_tensor_info().unwrap();
+    input_tensor_info.preprocess_input_tensor_set_from(&tensor).unwrap();
 
-    let layout_tensor_string = "NHWC";//gives [1, 299, 299, 299] mismatch
-    //let layout_tensor_string = "NCHW";
-    let input_layout = Layout::new(&layout_tensor_string);
+    let layout_tensor_string = "NHWC";
+    let input_layout = Layout::new(&layout_tensor_string).unwrap();
     input_tensor_info.preprocess_input_tensor_set_layout(
         &input_layout,
-    );
-    let mut preprocess_steps = input_info.get_preprocess_steps();
-    preprocess_steps.preprocess_steps_resize( 0);
+    ).unwrap();
+    let mut preprocess_steps = input_info.get_preprocess_steps().unwrap();
+    preprocess_steps.preprocess_steps_resize( 0).unwrap();
 
-    let model_info = input_info.get_model_info();
+    let model_info = input_info.get_model_info().unwrap();
     let layout_string = "NCHW";
-    let model_layout = Layout::new(&layout_string);
-    model_info.model_info_set_layout(model_layout);
+    let model_layout = Layout::new(&layout_string).unwrap();
+    model_info.model_info_set_layout(model_layout).unwrap();
 
-    //let output_info = pre_post_process.get_output_info_by_index(0);
-    //let output_tensor_info = output_info.get_output_info_get_tensor_info();
-    //output_tensor_info.preprocess_set_element_type(ElementType::F32);
-
-    pre_post_process.build(&mut new_model);
+    pre_post_process.build(&mut new_model).unwrap();
 
     let input_port = model.get_input_by_index(0).unwrap();
     assert_eq!(input_port.get_name().unwrap(), "input");
@@ -73,7 +68,7 @@ fn classify_inception() {
     let mut infer_request = executable_model.create_infer_request().unwrap();
 
     // Execute inference.
-    infer_request.set_tensor("input", &tensor); /*.unwrap();*/
+    infer_request.set_tensor("input", &tensor).unwrap();
     infer_request.infer().unwrap();
     let mut results = infer_request
         .get_tensor(&output_port.get_name().unwrap())

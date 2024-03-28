@@ -17,12 +17,13 @@ unsafe impl Sync for InferRequest {}
 
 impl InferRequest {
     /// Assign a [tensor] to the input on the model.
-    pub fn set_tensor(&mut self, name: &str, tensor: &Tensor) -> () {
+    pub fn set_tensor(&mut self, name: &str, tensor: &Tensor) -> Result<()> {
         try_unsafe!(ov_infer_request_set_tensor(
             self.instance,
             cstr!(name),
             tensor.instance
-        ));
+        ))?;
+        Ok(())
     }
 
     /// Retrieve a [tensor] from the output on the model.
@@ -38,6 +39,7 @@ impl InferRequest {
 
     /// Execute the inference request.
     pub fn infer(&mut self) -> Result<()> {
-        try_unsafe!(ov_infer_request_infer(self.instance))
+        try_unsafe!(ov_infer_request_infer(self.instance))?;
+        Ok(())
     }
 }

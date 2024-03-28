@@ -1,6 +1,6 @@
 use std::ffi::CString;
 use openvino_sys::{ov_layout_create, ov_layout_free, ov_layout_t};
-use crate::{drop_using_function, try_unsafe};
+use crate::{drop_using_function, try_unsafe, util::Result};
 
 /// Represents a layout.
 pub struct Layout {
@@ -18,15 +18,14 @@ impl Layout {
     /// # Returns
     ///
     /// A new `Layout` instance.
-    pub fn new(layout_desc: &str) -> Self {
+    pub fn new(layout_desc: &str) -> Result<Self> {
         let mut layout = std::ptr::null_mut();
         let c_layout_desc = CString::new(layout_desc).unwrap();
-        let code = try_unsafe!(ov_layout_create(
+        try_unsafe!(ov_layout_create(
             c_layout_desc.as_ptr(),
             std::ptr::addr_of_mut!(layout)
-        ));
-        assert_eq!(code, Ok(()));
-        Self { instance: layout }
+        ))?;
+        Ok(Self { instance: layout })
     }
 }
 
@@ -37,7 +36,7 @@ mod tests {
     #[test]
     fn test_new_layout() {
         let layout_desc = "NCHW";
-        let layout = Layout::new(layout_desc);
+        let layout = Layout::new(layout_desc).unwrap();
         assert_eq!(layout.instance.is_null(), false);
     }
 }

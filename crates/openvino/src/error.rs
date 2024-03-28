@@ -57,7 +57,7 @@ impl InferenceError {
             openvino_sys::ov_status_e_NOT_ALLOCATED => Err(NotAllocated),
             openvino_sys::ov_status_e_INFER_NOT_STARTED => Err(InferNotStarted),
             openvino_sys::ov_status_e_NETWORK_NOT_READ => Err(NetworkNotReady),
-            openvino_sys::ov_status_e_INVALID_C_PARAM => Err(InvalidCParam), //14
+            openvino_sys::ov_status_e_INVALID_C_PARAM => Err(InvalidCParam),
             _ => Err(Undefined(error_code)),
         }
     }

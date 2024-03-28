@@ -690,8 +690,8 @@ extern "C" {
 extern "C" {
     #[doc = " @brief Constructs OpenVINO Core instance.\n See RegisterPlugins for more details.\n @ingroup ov_core_c_api\n @param xml_config_file_ws A path to model file with unicode.\n @param core A pointer to the newly created ov_core_t.\n @return Status code of the operation: OK(0) for success."]
     pub fn ov_core_create_with_config_unicode(
-        // xml_config_file_ws: *const wchar_t,
-        xml_config_file_ws: *const char,
+        //xml_config_file_ws: *const wchar_t,
+        xml_config_file_ws: *const ::std::os::raw::c_char,
         core: *mut *mut ov_core_t,
     ) -> ov_status_e;
 }
@@ -714,8 +714,8 @@ extern "C" {
         core: *const ov_core_t,
         // model_path: *const wchar_t,
         // bin_path: *const wchar_t,
-        model_path: *const char,
-        bin_path: *const char,
+        model_path: *const ::std::os::raw::c_char,
+        bin_path: *const ::std::os::raw::c_char,
         model: *mut *mut ov_model_t,
     ) -> ov_status_e;
 }
@@ -765,7 +765,7 @@ extern "C" {
     pub fn ov_core_compile_model_from_file_unicode(
         core: *const ov_core_t,
         // model_path: *const wchar_t,
-        model_path: *const char,
+        model_path: *const ::std::os::raw::c_char,
         device_name: *const ::std::os::raw::c_char,
         property_args_size: usize,
         compiled_model: *mut *mut ov_compiled_model_t,

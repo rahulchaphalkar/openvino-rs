@@ -40,36 +40,36 @@ fn classify_mobilenet() {
 
     //Set up input
     let data = fs::read(Fixture::tensor()).unwrap();
-    let input_shape = Shape::new(&vec![1, 224, 224, 3]);
+    let input_shape = Shape::new(&vec![1, 224, 224, 3]).unwrap();
     let element_type = ElementType::F32;
     let tensor = Tensor::new_from_host_ptr(element_type, input_shape, &data).unwrap();
 
     //configure preprocessing
-    let pre_post_process = PrePostprocess::new(&mut model);
-    let input_info = pre_post_process.get_input_info_by_name("input");
-    let mut input_tensor_info = input_info.preprocess_input_info_get_tensor_info();
-    input_tensor_info.preprocess_input_tensor_set_from(&tensor);
+    let pre_post_process = PrePostprocess::new(&mut model).unwrap();
+    let input_info = pre_post_process.get_input_info_by_name("input").unwrap();
+    let mut input_tensor_info = input_info.preprocess_input_info_get_tensor_info().unwrap();
+    input_tensor_info.preprocess_input_tensor_set_from(&tensor).unwrap();
 
     //set layout of input tensor
     let layout_tensor_string = "NHWC";
-    let input_layout = Layout::new(&layout_tensor_string);
-    input_tensor_info.preprocess_input_tensor_set_layout(&input_layout);
+    let input_layout = Layout::new(&layout_tensor_string).unwrap();
+    input_tensor_info.preprocess_input_tensor_set_layout(&input_layout).unwrap();
 
     //set any preprocessing steps
-    let mut preprocess_steps = input_info.get_preprocess_steps();
-    preprocess_steps.preprocess_steps_resize( 0);
-    let model_info = input_info.get_model_info();
+    let mut preprocess_steps = input_info.get_preprocess_steps().unwrap();
+    preprocess_steps.preprocess_steps_resize( 0).unwrap();
+    let model_info = input_info.get_model_info().unwrap();
 
     //set model input layout
     let layout_string = "NCHW";
-    let model_layout = Layout::new(&layout_string);
-    model_info.model_info_set_layout(model_layout);
+    let model_layout = Layout::new(&layout_string).unwrap();
+    model_info.model_info_set_layout(model_layout).unwrap();
 
-    let output_info = pre_post_process.get_output_info_by_index(0);
-    let output_tensor_info = output_info.get_output_info_get_tensor_info();
-    output_tensor_info.preprocess_set_element_type(ElementType::F32);
+    let output_info = pre_post_process.get_output_info_by_index(0).unwrap();
+    let output_tensor_info = output_info.get_output_info_get_tensor_info().unwrap();
+    output_tensor_info.preprocess_set_element_type(ElementType::F32).unwrap();
 
-    pre_post_process.build(&mut new_model);
+    pre_post_process.build(&mut new_model).unwrap();
 
     // Load the model.
     let mut executable_model = core.compile_model(new_model, "CPU").unwrap();
@@ -78,7 +78,7 @@ fn classify_mobilenet() {
     let mut infer_request = executable_model.create_infer_request().unwrap();
 
     //Prepare input
-    infer_request.set_tensor("input", &tensor); /*.unwrap();*/
+    infer_request.set_tensor("input", &tensor).unwrap();
 
     // Execute inference.
     infer_request.infer().unwrap();
