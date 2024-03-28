@@ -2,7 +2,8 @@ use crate::tensor::Tensor;
 use crate::{cstr, drop_using_function, try_unsafe, util::Result};
 use openvino_sys::{
     ov_infer_request_free, ov_infer_request_get_tensor, ov_infer_request_infer,
-    ov_infer_request_set_tensor, ov_infer_request_start_async, ov_infer_request_wait_for, ov_infer_request_t, ov_tensor, ov_tensor_t,
+    ov_infer_request_set_tensor, ov_infer_request_start_async, ov_infer_request_t,
+    ov_infer_request_wait_for,
 };
 
 /// See
