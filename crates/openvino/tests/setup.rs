@@ -3,7 +3,6 @@ mod fixtures;
 
 use fixtures::alexnet::Fixture;
 use openvino::Core;
-use std::fs;
 
 #[test]
 fn read_network() {

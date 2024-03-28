@@ -1,9 +1,9 @@
 //! Define the core interface between Rust and OpenVINO's C
 //! [API](https://docs.openvino.ai/2023.3/api/c_cpp_api/group__ov__core__c__api.html).
 
-use crate::Tensor;
+use crate::{SetupError, Tensor};
 use crate::{cstr, drop_using_function, try_unsafe, util::Result};
-use crate::error::{LoadingError, SetupError};
+use crate::error::LoadingError;
 use crate::{model::CompiledModel, Model,};
 
 use openvino_sys::{
@@ -42,7 +42,7 @@ impl Core {
 
         let mut instance = std::ptr::null_mut();
         try_unsafe!(ov_core_create_with_config(file, std::ptr::addr_of_mut!(instance)))?;
-        Ok(Core { instance })
+        Ok(Self { instance })
     }
 
     /// Read a Model from a pair of files: `model_path` points to an XML file containing the

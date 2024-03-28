@@ -24,18 +24,17 @@ impl Shape {
     /// # Arguments
     ///
     /// * `dimensions` - A vector of dimensions for the shape.
-    pub fn new(dimensions: &Vec<i64>) -> Self {
+    pub fn new(dimensions: &Vec<i64>) -> Result<Self> {
         let mut shape = ov_shape_t {
             rank: 8,
             dims: std::ptr::null_mut(),
         };
-        let code = try_unsafe!(ov_shape_create(
+        try_unsafe!(ov_shape_create(
             dimensions.len().try_into().unwrap(),
             dimensions.as_ptr(),
             std::ptr::addr_of_mut!(shape)
-        ));
-        assert_eq!(code, Ok(()));
-        Self { instance: shape }
+        ))?;
+        Ok(Self { instance: shape })
     }
 
     /// Returns the rank of the shape.
@@ -55,7 +54,7 @@ mod tests {
     #[test]
     fn test_new_shape() {
         let dimensions = vec![1, 2, 3, 4];
-        let shape = Shape::new(&dimensions);
+        let shape = Shape::new(&dimensions).unwrap();
         assert_eq!(shape.get_rank().unwrap(), 4);
     }
 }
