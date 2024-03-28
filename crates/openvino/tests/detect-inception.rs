@@ -4,9 +4,7 @@ mod fixtures;
 //mod util;
 
 use fixtures::inception_ssd::Fixture;
-use openvino::{
-    Core, ElementType, Layout, PrePostprocess, Shape, Tensor, Model
-};
+use openvino::{Core, ElementType, Layout, Model, PrePostprocess, Shape, Tensor};
 use std::fs;
 
 #[test]
@@ -25,12 +23,9 @@ fn detect_inception() {
         )
         .unwrap();
 
-           //Set up output
+    //Set up output
     let output_port = model.get_output_by_index(0).unwrap();
-    assert_eq!(
-        output_port.get_name().unwrap(),
-        "DetectionOutput"
-    );
+    assert_eq!(output_port.get_name().unwrap(), "DetectionOutput");
 
     let input_port = model.get_input_by_index(0).unwrap();
     assert_eq!(input_port.get_name().unwrap(), "image_tensor");
@@ -40,17 +35,25 @@ fn detect_inception() {
     let input_shape = Shape::new(&vec![1, 481, 640, 3]).unwrap();
     let element_type = ElementType::U8;
     let tensor = Tensor::new_from_host_ptr(element_type, input_shape, &data).unwrap();
-    let pre_post_process = PrePostprocess::new(& model).unwrap();
-    let input_info = pre_post_process.get_input_info_by_name("image_tensor").unwrap();
+    let pre_post_process = PrePostprocess::new(&model).unwrap();
+    let input_info = pre_post_process
+        .get_input_info_by_name("image_tensor")
+        .unwrap();
     let mut input_tensor_info = input_info.preprocess_input_info_get_tensor_info().unwrap();
-    input_tensor_info.preprocess_input_tensor_set_from(&tensor).unwrap();
+    input_tensor_info
+        .preprocess_input_tensor_set_from(&tensor)
+        .unwrap();
 
     let layout_tensor_string = "NHWC";
     let input_layout = Layout::new(&layout_tensor_string).unwrap();
-    input_tensor_info.preprocess_input_tensor_set_layout(&input_layout).unwrap();
+    input_tensor_info
+        .preprocess_input_tensor_set_layout(&input_layout)
+        .unwrap();
     let mut preprocess_steps = input_info.get_preprocess_steps().unwrap();
-    preprocess_steps.preprocess_steps_resize( 0).unwrap();
-    preprocess_steps.preprocess_convert_element_type(ElementType::F32).unwrap();
+    preprocess_steps.preprocess_steps_resize(0).unwrap();
+    preprocess_steps
+        .preprocess_convert_element_type(ElementType::F32)
+        .unwrap();
     //Layout conversion is supposed to be implicit, but can be done explicitly like shown below in comments
     // let input_layout_convert = Layout::new("NCHW");
     // preprocess_steps.preprocess_convert_layout(input_layout_convert);
@@ -62,7 +65,9 @@ fn detect_inception() {
 
     let output_info = pre_post_process.get_output_info_by_index(0).unwrap();
     let output_tensor_info = output_info.get_output_info_get_tensor_info().unwrap();
-    output_tensor_info.preprocess_set_element_type(ElementType::F32).unwrap();
+    output_tensor_info
+        .preprocess_set_element_type(ElementType::F32)
+        .unwrap();
 
     pre_post_process.build(&mut new_model).unwrap();
 

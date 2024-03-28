@@ -49,11 +49,7 @@ impl Tensor {
     /// # Returns
     ///
     /// A new `Tensor` object.
-    pub fn new_from_host_ptr(
-        data_type: ElementType,
-        shape: Shape,
-        data: &[u8],
-    ) -> Result<Self> {
+    pub fn new_from_host_ptr(data_type: ElementType, shape: Shape, data: &[u8]) -> Result<Self> {
         let mut tensor: *mut ov_tensor_t = std::ptr::null_mut();
         let element_type: u32 = data_type as u32;
         let buffer = data.as_ptr() as *mut std::os::raw::c_void;
@@ -80,7 +76,6 @@ impl Tensor {
         Ok(Self {
             instance: self.instance,
         })
-
     }
 
     /// Get the shape of the tensor.
@@ -121,7 +116,10 @@ impl Tensor {
     /// The number of elements in the tensor.
     pub fn get_size(&self) -> Result<usize> {
         let mut elements_size = 0;
-        try_unsafe!(ov_tensor_get_size(self.instance, std::ptr::addr_of_mut!(elements_size)))?;
+        try_unsafe!(ov_tensor_get_size(
+            self.instance,
+            std::ptr::addr_of_mut!(elements_size)
+        ))?;
         Ok(elements_size)
     }
 
@@ -146,10 +144,7 @@ impl Tensor {
     /// A mutable reference to the data of the tensor.
     pub fn get_data<T>(&mut self) -> Result<&mut [T]> {
         let mut data = std::ptr::null_mut();
-        try_unsafe!(ov_tensor_data(
-            self.instance,
-            std::ptr::addr_of_mut!(data),
-        ))?;
+        try_unsafe!(ov_tensor_data(self.instance, std::ptr::addr_of_mut!(data),))?;
         let size = self.get_byte_size()? / std::mem::size_of::<T>();
         let slice = unsafe { std::slice::from_raw_parts_mut(data.cast::<T>(), size) };
         Ok(slice)
@@ -167,9 +162,7 @@ impl Tensor {
             std::ptr::addr_of_mut!(buffer)
         ))?;
         let size = self.get_byte_size()?;
-        let slice = unsafe {
-            std::slice::from_raw_parts_mut(buffer.cast::<u8>(), size)
-        };
+        let slice = unsafe { std::slice::from_raw_parts_mut(buffer.cast::<u8>(), size) };
         Ok(slice)
     }
 }
@@ -177,7 +170,7 @@ impl Tensor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Shape, ElementType};
+    use crate::{ElementType, Shape};
 
     #[test]
     fn test_create_tensor() {
@@ -188,30 +181,36 @@ mod tests {
 
     #[test]
     fn test_get_shape() {
-        let tensor = Tensor::new(ElementType::F32, Shape::new(&vec![1, 3, 227, 227]).unwrap()).unwrap();
+        let tensor =
+            Tensor::new(ElementType::F32, Shape::new(&vec![1, 3, 227, 227]).unwrap()).unwrap();
         let shape = tensor.get_shape().unwrap();
         assert_eq!(shape.get_rank().unwrap(), 4);
     }
 
     #[test]
     fn test_get_element_type() {
-        let tensor = Tensor::new(ElementType::F32, Shape::new(&vec![1, 3, 227, 227]).unwrap()).unwrap();
+        let tensor =
+            Tensor::new(ElementType::F32, Shape::new(&vec![1, 3, 227, 227]).unwrap()).unwrap();
         let element_type = tensor.get_element_type().unwrap();
         assert_eq!(element_type, ElementType::F32 as u32);
     }
 
     #[test]
     fn test_get_size() {
-        let tensor = Tensor::new(ElementType::F32, Shape::new(&vec![1, 3, 227, 227]).unwrap()).unwrap();
+        let tensor =
+            Tensor::new(ElementType::F32, Shape::new(&vec![1, 3, 227, 227]).unwrap()).unwrap();
         let size = tensor.get_size().unwrap();
         assert_eq!(size, 1 * 3 * 227 * 227);
     }
 
     #[test]
     fn test_get_byte_size() {
-        let tensor = Tensor::new(ElementType::F32, Shape::new(&vec![1, 3, 227, 227]).unwrap()).unwrap();
+        let tensor =
+            Tensor::new(ElementType::F32, Shape::new(&vec![1, 3, 227, 227]).unwrap()).unwrap();
         let byte_size = tensor.get_byte_size().unwrap();
-        assert_eq!(byte_size, 1 * 3 * 227 * 227 * std::mem::size_of::<f32>() as usize);
+        assert_eq!(
+            byte_size,
+            1 * 3 * 227 * 227 * std::mem::size_of::<f32>() as usize
+        );
     }
-
 }

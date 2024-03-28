@@ -7,9 +7,8 @@ use crate::request::InferRequest;
 use crate::{drop_using_function, try_unsafe, util::Result};
 
 use openvino_sys::{
-    ov_compiled_model_create_infer_request, ov_compiled_model_free,
-    ov_compiled_model_t, ov_model_const_input_by_index,
-    ov_model_const_output_by_index, ov_model_free,
+    ov_compiled_model_create_infer_request, ov_compiled_model_free, ov_compiled_model_t,
+    ov_model_const_input_by_index, ov_model_const_output_by_index, ov_model_free,
     ov_model_inputs_size, ov_model_outputs_size, ov_model_t,
 };
 

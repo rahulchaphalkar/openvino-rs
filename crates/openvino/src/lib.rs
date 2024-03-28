@@ -15,28 +15,31 @@
     clippy::len_without_is_empty
 )]
 
-mod tensor;
 mod core;
-mod error;
-mod model;
-mod request;
 mod element_type;
+mod error;
 mod layout;
+mod model;
 mod port;
 mod prepostprocess;
+mod request;
 mod shape;
+mod tensor;
 mod util;
 
 pub use crate::core::Core;
-pub use tensor::Tensor;
 pub use element_type::ElementType;
 pub use error::{InferenceError, LoadingError, SetupError};
 pub use layout::Layout;
 pub use model::{CompiledModel, Model};
-pub use prepostprocess::{PrePostprocess, PreprocessInputInfo, PreprocessInputModelInfo, PreprocessInputTensorInfo, PreprocessOutputInfo, PreprocessOutputTensorInfo, PreprocessSteps};
-pub use shape::Shape;
-pub use request::InferRequest;
 pub use port::Port;
+pub use prepostprocess::{
+    PrePostprocess, PreprocessInputInfo, PreprocessInputModelInfo, PreprocessInputTensorInfo,
+    PreprocessOutputInfo, PreprocessOutputTensorInfo, PreprocessSteps,
+};
+pub use request::InferRequest;
+pub use shape::Shape;
+pub use tensor::Tensor;
 
 /// Emit the version string of the OpenVINO C API backing this implementation.
 ///

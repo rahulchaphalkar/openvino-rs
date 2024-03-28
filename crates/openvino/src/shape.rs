@@ -1,6 +1,6 @@
-use std::convert::TryInto;
-use openvino_sys::{ov_shape_create, ov_shape_free, ov_shape_t};
 use crate::{try_unsafe, util::Result};
+use openvino_sys::{ov_shape_create, ov_shape_free, ov_shape_t};
+use std::convert::TryInto;
 
 /// Represents a shape in OpenVINO.
 pub struct Shape {
@@ -58,4 +58,3 @@ mod tests {
         assert_eq!(shape.get_rank().unwrap(), 4);
     }
 }
-

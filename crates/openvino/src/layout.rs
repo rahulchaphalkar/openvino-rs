@@ -1,6 +1,6 @@
-use std::ffi::CString;
-use openvino_sys::{ov_layout_create, ov_layout_free, ov_layout_t};
 use crate::{drop_using_function, try_unsafe, util::Result};
+use openvino_sys::{ov_layout_create, ov_layout_free, ov_layout_t};
+use std::ffi::CString;
 
 /// Represents a layout.
 pub struct Layout {
