@@ -34,3 +34,16 @@ impl Shape {
     }
 
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new_shape() {
+        let dimensions = vec![1, 2, 3, 4];
+        let shape = Shape::new(&dimensions);
+        assert_eq!(shape.get_rank().unwrap(), 4);
+    }
+}
+
