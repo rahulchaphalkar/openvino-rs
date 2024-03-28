@@ -19,3 +19,15 @@ impl Layout {
         Self { instance: layout }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new_layout() {
+        let layout_desc = "NCHW";
+        let layout = Layout::new(layout_desc);
+        assert_eq!(layout.instance.is_null(), false);
+    }
+}

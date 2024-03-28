@@ -80,8 +80,6 @@ impl Core {
     }
 }
 
-//Tests for core.rs
-/*
 #[cfg(test)]
 mod core_tests {
     use super::*;
@@ -90,29 +88,4 @@ mod core_tests {
         let core = Core::new();
         assert!(core.is_ok());
     }
-
-    #[test]
-    fn test_new_with_config() {
-        let core = Core::new_with_config(None);
-        assert!(core.is_ok());
-    }
-
-    #[test]
-    fn test_read_model_from_file() {
-        let mut core = Core::new().unwrap();
-        let model_path = "path/to/model.xml";
-        let weights_path = "path/to/weights.bin";
-        let model = core.read_model_from_file(model_path, weights_path);
-        assert!(model.is_ok());
-    }
-
-    #[test]
-    fn test_compile_model() {
-        let mut core = Core::new().unwrap();
-        let model = Model { instance: std::ptr::null_mut() };
-        let device = "CPU";
-        let compiled_model = core.compile_model(model, device);
-        assert!(compiled_model.is_ok());
-    }
 }
-*/
