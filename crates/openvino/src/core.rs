@@ -6,7 +6,7 @@ use crate::{cstr, drop_using_function, try_unsafe, util::Result};
 use crate::{model::CompiledModel, Model};
 use crate::{DeviceType, PropertyKey, RwPropertyKey, SetupError, Tensor, Version};
 use openvino_sys::{
-    self, ov_available_devices_free, ov_core_compile_model, ov_core_create,
+    self, ov_available_devices_free, ov_core_add_extension, ov_core_compile_model, ov_core_create,
     ov_core_create_with_config, ov_core_free, ov_core_get_available_devices, ov_core_get_property,
     ov_core_get_versions_by_device_name, ov_core_read_model, ov_core_read_model_from_memory_buffer,
     ov_core_set_property, ov_core_t, ov_core_versions_free,
@@ -210,6 +210,13 @@ impl Core {
             std::ptr::addr_of_mut!(compiled_model)
         ))?;
         Ok(CompiledModel::from_ptr(compiled_model))
+    }
+
+    /// Add an extension library to the core.
+    pub fn add_extension(&mut self, extension_path: &str) -> Result<()> {
+        let extension_path = cstr!(extension_path);
+        try_unsafe!(ov_core_add_extension(self.ptr, extension_path.as_ptr()))?;
+        Ok(())
     }
 }
 
