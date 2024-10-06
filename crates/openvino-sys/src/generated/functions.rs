@@ -740,6 +740,13 @@ extern "C" {
     ) -> ov_status_e;
 }
 extern "C" {
+    #[doc = " @brief Adds an extension to the core.\n @ingroup ov_core_c_api\n @param core A pointer to the ov_core_t instance.\n @param library_path Path to an extension.\n @return Status code of the operation: OK(0) for success."]
+    pub fn ov_core_add_extension(
+        core: *const ov_core_t,
+        library_path: *const ::std::os::raw::c_char,
+    ) -> ov_status_e;
+}
+extern "C" {
     #[doc = " @brief Reads a model and creates a compiled model from the IR/ONNX/PDPD file.\n This can be more efficient than using the ov_core_read_model_from_XXX + ov_core_compile_model flow,\n especially for cases when caching is enabled and a cached model is available.\n @ingroup ov_core_c_api\n @param core A pointer to the ov_core_t instance.\n @param model_path Path to a model.\n @param device_name Name of a device to load a model to.\n @param property_args_size How many properties args will be passed, each property contains 2 args: key and value.\n @param compiled_model A pointer to the newly created compiled_model.\n @param ... Optional pack of pairs: <char* property_key, char* property_value> relevant only\n for this load operation operation. Supported property key please see ov_property.h.\n @return Status code of the operation: OK(0) for success."]
     pub fn ov_core_compile_model_from_file(
         core: *const ov_core_t,
@@ -924,10 +931,26 @@ extern "C" {
     ) -> ov_status_e;
 }
 extern "C" {
+    #[doc = " @brief Add scale preprocess operation. Divide each channel element of input by different specified value.\n @ingroup ov_prepostprocess_c_api\n @param preprocess_input_process_steps A pointer to ov_preprocess_preprocess_steps_t.\n @param values Scaling values array for each channels\n @param value_size Scaling value size\n @return Status code of the operation: OK(0) for success."]
+    pub fn ov_preprocess_preprocess_steps_scale_multi_channels(
+        preprocess_input_process_steps: *mut ov_preprocess_preprocess_steps_t,
+        values: *const f32,
+        value_size: i32,
+    ) -> ov_status_e;
+}
+extern "C" {
     #[doc = " @brief Add mean preprocess operation. Subtract specified value from each element of input.\n @ingroup ov_prepostprocess_c_api\n @param preprocess_input_process_steps A pointer to ov_preprocess_preprocess_steps_t.\n @param value Value to subtract from each element.\n @return Status code of the operation: OK(0) for success."]
     pub fn ov_preprocess_preprocess_steps_mean(
         preprocess_input_process_steps: *mut ov_preprocess_preprocess_steps_t,
         value: f32,
+    ) -> ov_status_e;
+}
+extern "C" {
+    #[doc = " @brief Add mean preprocess operation. Subtract each channel element of input by different specified value.\n @ingroup ov_prepostprocess_c_api\n @param preprocess_input_process_steps A pointer to ov_preprocess_preprocess_steps_t.\n @param values Value array to subtract from each element.\n @param value_size Mean value size\n @return Status code of the operation: OK(0) for success."]
+    pub fn ov_preprocess_preprocess_steps_mean_multi_channels(
+        preprocess_input_process_steps: *mut ov_preprocess_preprocess_steps_t,
+        values: *const f32,
+        value_size: i32,
     ) -> ov_status_e;
 }
 extern "C" {
