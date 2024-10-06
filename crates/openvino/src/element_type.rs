@@ -3,9 +3,9 @@ use openvino_sys::{
     ov_element_type_e_F32, ov_element_type_e_F64, ov_element_type_e_F8E4M3,
     ov_element_type_e_F8E5M3, ov_element_type_e_I16, ov_element_type_e_I32, ov_element_type_e_I4,
     ov_element_type_e_I64, ov_element_type_e_I8, ov_element_type_e_NF4,
-    ov_element_type_e_OV_BOOLEAN, ov_element_type_e_U1, ov_element_type_e_U16,
-    ov_element_type_e_U32, ov_element_type_e_U4, ov_element_type_e_U64, ov_element_type_e_U8,
-    ov_element_type_e_UNDEFINED,
+    ov_element_type_e_OV_BOOLEAN, ov_element_type_e_STRING, ov_element_type_e_U1,
+    ov_element_type_e_U16, ov_element_type_e_U32, ov_element_type_e_U4, ov_element_type_e_U64,
+    ov_element_type_e_U8, ov_element_type_e_UNDEFINED,
 };
 
 use std::convert::TryFrom;
@@ -58,6 +58,8 @@ pub enum ElementType {
     F8E4M3 = ov_element_type_e_F8E4M3,
     /// F8E5M3 element type.
     F8E5M3 = ov_element_type_e_F8E5M3,
+    /// String element type.
+    String = ov_element_type_e_STRING,
 }
 
 /// Error returned when attempting to create an [`ElementType`] from an illegal `u32` value.
@@ -99,6 +101,7 @@ impl TryFrom<u32> for ElementType {
             ov_element_type_e_NF4 => Ok(Self::NF4),
             ov_element_type_e_F8E4M3 => Ok(Self::F8E4M3),
             ov_element_type_e_F8E5M3 => Ok(Self::F8E5M3),
+            ov_element_type_e_STRING => Ok(Self::String),
             _ => Err(IllegalValueError(value)),
         }
     }
@@ -134,6 +137,7 @@ impl fmt::Display for ElementType {
             Self::NF4 => write!(f, "NF4"),
             Self::F8E4M3 => write!(f, "F8E4M3"),
             Self::F8E5M3 => write!(f, "F8E5M3"),
+            Self::String => write!(f, "String"),
         }
     }
 }
