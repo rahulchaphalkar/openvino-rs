@@ -195,6 +195,13 @@ extern "C" {
     ) -> ov_status_e;
 }
 extern "C" {
+    #[doc = " @brief STRING Provides an access to the underlaying host memory.\n @ingroup ov_tensor_c_api\n @param data A point to host memory.\n @param tensor A point to ov_tensor_t\n @return Status code of the operation: OK(0) for success."]
+    pub fn ov_tensor_set_string(
+        tensor: *const ov_tensor_t,
+        cstring: *const ::std::os::raw::c_char,
+    ) -> ov_status_e;
+}
+extern "C" {
     #[doc = " @brief Free ov_tensor_t.\n @ingroup ov_tensor_c_api\n @param tensor A point to ov_tensor_t"]
     pub fn ov_tensor_free(tensor: *mut ov_tensor_t);
 }

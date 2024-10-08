@@ -1,9 +1,14 @@
 //! This module provides functionality related to Tensor objects.
 use std::convert::TryInto as _;
+use std::os::raw::c_char;
+use std::ffi::CStr;
+use std::ffi::CString;
 
+use crate::cstr;
 use crate::element_type::ElementType;
 use crate::shape::Shape;
 use crate::{drop_using_function, try_unsafe, util::Result};
+use openvino_sys::ov_tensor_set_string;
 use openvino_sys::{
     self, ov_shape_t, ov_tensor_create, ov_tensor_data, ov_tensor_free, ov_tensor_get_byte_size,
     ov_tensor_get_element_type, ov_tensor_get_shape, ov_tensor_get_size, ov_tensor_set_shape,
@@ -98,6 +103,62 @@ impl Tensor {
         let slice = unsafe { std::slice::from_raw_parts(buffer.cast::<u8>(), size) };
         Ok(slice)
     }
+
+    /// todo
+    pub fn get_string_data(&self) -> Result<String> {
+        let mut buffer = std::ptr::null_mut();
+        try_unsafe!(ov_tensor_data(self.ptr, std::ptr::addr_of_mut!(buffer)))?;
+
+        let char_ptr_ptr = buffer as *mut *mut c_char;
+        let char_ptr = unsafe { *char_ptr_ptr };
+        let c_str = unsafe { CStr::from_ptr(char_ptr) };
+        let string_data = c_str.to_str().unwrap().to_owned();
+        Ok(string_data)
+    }
+
+    /// todo
+    pub fn set_string_data(&mut self, prompt: &str) -> Result<()> {
+        let mut buffer = std::ptr::null_mut();
+        try_unsafe!(ov_tensor_data(self.ptr, std::ptr::addr_of_mut!(buffer)))?;
+
+        let prompt = cstr!(prompt);
+        try_unsafe!(ov_tensor_set_string(
+            self.ptr,
+            prompt.as_ptr(),
+        ))?;
+        Ok(())
+    }
+    /*
+    pub fn set_string_data(&mut self, strings: Vec<String>, fixed_size: usize) -> Result<()> {
+        // let mut buffer = Vec::with_capacity(strings.len() * fixed_size);
+        let mut buffer = Vec::with_capacity(strings.len()+1);
+        for s in &strings {
+            let c_string = CString::new(s.as_str()).unwrap();
+            let c_bytes = c_string.as_bytes_with_nul();
+            buffer.extend_from_slice(c_bytes);
+
+        }
+
+        // Retrieve the buffer as a void**
+        let mut buffer_ptr = std::ptr::null_mut();
+        try_unsafe!(ov_tensor_data(self.ptr, std::ptr::addr_of_mut!(buffer_ptr)))?;
+
+        // Cast the buffer to *mut *mut c_char
+        let char_ptr_ptr = buffer_ptr as *mut *mut c_char;
+
+        // Dereference to get *mut c_char
+        //let char_ptr = unsafe { *char_ptr_ptr };
+
+        // Copy the buffer into the tensor buffer
+        unsafe {
+            std::ptr::copy_nonoverlapping(buffer.as_ptr(), char_ptr_ptr as *mut u8, buffer.len());
+        }
+        let tensor_buffer = unsafe { std::slice::from_raw_parts(char_ptr_ptr as *const u8, buffer.len()) };
+        println!("Tensor buffer content: {:?}", tensor_buffer);
+
+        Ok(())
+    }
+    */
 
     /// Get a mutable reference to the underlying data for the tensor.
     pub fn get_raw_data_mut(&mut self) -> Result<&mut [u8]> {
